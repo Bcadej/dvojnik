@@ -24,6 +24,13 @@ public partial class ExplorerPane : UserControl
     /// <summary>Distinguishes the two panes so each gets its own saved shortcut bar.</summary>
     public string PaneId { get; set; } = "Pane";
 
+    /// <summary>Column this pane is sorted by, and in which direction.</summary>
+    public FileSortField SortField { get; private set; } = FileSortField.Name;
+    public bool SortAscending { get; private set; } = true;
+
+    /// <summary>Raised when the user clicks a column header, so Sync View can match sides.</summary>
+    public event Action<ExplorerPane>? SortChanged;
+
     public ObservableCollection<ShortcutItem> Shortcuts { get; } = new();
     private bool _shortcutsLoaded;
 
@@ -73,6 +80,7 @@ public partial class ExplorerPane : UserControl
             _shortcutsLoaded = true;
             foreach (var s in ShortcutStore.Load(PaneId)) Shortcuts.Add(s);
             UpdateShortcutHint();
+            UpdateSortArrows();
         };
 
         NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
@@ -109,7 +117,7 @@ public partial class ExplorerPane : UserControl
             }
 
             _realItems.Clear();
-            _realItems.AddRange(entries);
+            _realItems.AddRange(FileSorter.Sort(entries, SortField, SortAscending));
 
             // Show the plain listing; MainWindow re-pads it afterwards if Sync View is on.
             ShowRealItems();
@@ -156,6 +164,52 @@ public partial class ExplorerPane : UserControl
     {
         Items.Clear();
         foreach (var item in aligned) Items.Add(item);
+    }
+
+    // ----- Sorting -----
+
+    private void ColumnHeader_Click(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not GridViewColumnHeader { Tag: string tag }) return;
+        if (!Enum.TryParse<FileSortField>(tag, out var field)) return;
+
+        // Same column again reverses; a different column starts ascending.
+        if (field == SortField) SortAscending = !SortAscending;
+        else { SortField = field; SortAscending = true; }
+
+        ApplySort();
+        SortChanged?.Invoke(this);
+    }
+
+    /// <summary>Applies a sort chosen elsewhere (the other pane, while in Sync View).</summary>
+    public void SetSort(FileSortField field, bool ascending)
+    {
+        if (SortField == field && SortAscending == ascending) return;
+
+        SortField = field;
+        SortAscending = ascending;
+        ApplySort();
+    }
+
+    private void ApplySort()
+    {
+        var sorted = FileSorter.Sort(_realItems, SortField, SortAscending).ToList();
+        _realItems.Clear();
+        _realItems.AddRange(sorted);
+
+        // In Sync View, MainWindow re-pads over the top of this straight afterwards.
+        ShowRealItems();
+        UpdateSortArrows();
+    }
+
+    private void UpdateSortArrows()
+    {
+        var arrow = SortAscending ? "▲" : "▼"; // ▲ / ▼
+
+        NameSortArrow.Text = SortField == FileSortField.Name ? arrow : "";
+        SizeSortArrow.Text = SortField == FileSortField.Size ? arrow : "";
+        TypeSortArrow.Text = SortField == FileSortField.Type ? arrow : "";
+        ModifiedSortArrow.Text = SortField == FileSortField.Modified ? arrow : "";
     }
 
     private void GoTo(string path, bool pushHistory)
@@ -496,6 +550,22 @@ public partial class ExplorerPane : UserControl
     /// <summary>Context-menu route onto the shortcut bar, as an alternative to dragging.</summary>
     private void AddToShortcutsMenuItem_Click(object sender, RoutedEventArgs e)
         => AddShortcuts(SelectedRealItems().Select(i => i.FullPath));
+
+    /// <summary>Relabels a shortcut. The target is untouched — only the button's caption changes.</summary>
+    private void RenameShortcut_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.DataContext is not ShortcutItem shortcut) return;
+
+        var newName = PromptDialog.Show(Strings.Get("Shortcut_Rename"),
+            Strings.Get("Shortcut_RenameLabel"), shortcut.Name);
+
+        // Cancelled — leave it alone. (An empty box means "go back to the default name".)
+        if (newName is null) return;
+
+        // Storing the default name as a custom one would only freeze it in place.
+        shortcut.CustomName = newName.Trim() == shortcut.DefaultName ? null : newName;
+        ShortcutStore.Save(PaneId, Shortcuts);
+    }
 
     private void RemoveShortcut_Click(object sender, RoutedEventArgs e)
     {

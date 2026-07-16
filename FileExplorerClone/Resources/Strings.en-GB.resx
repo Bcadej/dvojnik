@@ -145,6 +145,12 @@
   <data name="Shortcut_Add" xml:space="preserve">
     <value>Add to this pane's shortcuts</value>
   </data>
+  <data name="Shortcut_Rename" xml:space="preserve">
+    <value>Rename shortcut</value>
+  </data>
+  <data name="Shortcut_RenameLabel" xml:space="preserve">
+    <value>Shortcut name (leave empty for the default):</value>
+  </data>
   <data name="Shortcut_Remove" xml:space="preserve">
     <value>Remove shortcut</value>
   </data>

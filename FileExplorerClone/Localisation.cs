@@ -56,20 +56,40 @@ public static class LanguageManager
 
     /// <summary>
     /// Where the language choice is stored. Shown (and openable) in Help &gt; About so the
-    /// setting can be inspected or edited by hand.
+    /// setting can be inspected or edited by hand. Named in Slovenian, like the app.
     /// </summary>
-    public static string SettingsPath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Dvojnik", "language.txt");
+    public static string SettingsPath => Path.Combine(AppDataFolder, "jezik.txt");
+
+    /// <summary>Pre-1.0.6 name, migrated on startup.</summary>
+    private static string LegacySettingsPath => Path.Combine(AppDataFolder, "language.txt");
+
+    private static string AppDataFolder => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dvojnik");
 
     /// <summary>Applies the saved language, falling back to Slovenian as the app default.</summary>
     public static void Initialise()
     {
+        MigrateLegacyFile();
+
         var saved = TryReadSaved();
         var language = saved == English ? English : Slovenian;
 
         // Write the file out on first run so the About link always has something to open.
         Apply(language, persist: true);
+    }
+
+    /// <summary>Carries a pre-1.0.6 language.txt over to jezik.txt so the choice survives.</summary>
+    private static void MigrateLegacyFile()
+    {
+        try
+        {
+            if (File.Exists(LegacySettingsPath) && !File.Exists(SettingsPath))
+                File.Move(LegacySettingsPath, SettingsPath);
+        }
+        catch
+        {
+            // Not worth failing startup over — the default language simply applies.
+        }
     }
 
     public static void Apply(string language, bool persist = true)

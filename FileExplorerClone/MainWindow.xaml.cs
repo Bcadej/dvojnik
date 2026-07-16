@@ -21,6 +21,9 @@ public partial class MainWindow : Window
         LeftPane.Navigated += OnPaneNavigated;
         RightPane.Navigated += OnPaneNavigated;
 
+        LeftPane.SortChanged += OnPaneSortChanged;
+        RightPane.SortChanged += OnPaneSortChanged;
+
         LanguageManager.LanguageChanged += OnLanguageChanged;
         Closed += (_, _) => LanguageManager.LanguageChanged -= OnLanguageChanged;
 
@@ -60,6 +63,23 @@ public partial class MainWindow : Window
     private void UpdateSyncToggleCaption()
         => SyncToggle.Content = Strings.Get(_syncEnabled ? "Toolbar_SyncOn" : "Toolbar_SyncOff");
 
+    // ----- Sorting -----
+
+    /// <summary>
+    /// Aligned panes must share one row order, so in Sync View a sort on either side is
+    /// mirrored to the other. Unsynced, each pane sorts independently.
+    /// </summary>
+    private void OnPaneSortChanged(ExplorerPane source)
+    {
+        if (_syncEnabled)
+        {
+            var other = ReferenceEquals(source, LeftPane) ? RightPane : LeftPane;
+            other.SetSort(source.SortField, source.SortAscending);
+        }
+
+        CompareAndHighlight();
+    }
+
     // ----- Help -----
 
     private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
@@ -76,6 +96,10 @@ public partial class MainWindow : Window
             // Anchor both panes' current locations as the "roots" for relative sync.
             _leftSyncRoot = LeftPane.CurrentPath;
             _rightSyncRoot = RightPane.CurrentPath;
+
+            // Aligned rows only make sense if both sides share a sort order.
+            RightPane.SetSort(LeftPane.SortField, LeftPane.SortAscending);
+
             SetStatus(() => Strings.Get("Status_SyncOn"));
         }
         else
@@ -189,19 +213,21 @@ public partial class MainWindow : Window
         var leftLookup = BuildRowLookup(left);
         var rightLookup = BuildRowLookup(right);
 
-        // Directories first, then files, each alphabetically — matching how a pane sorts
-        // its own listing, so the order is unsurprising when Sync View goes on.
-        var order = leftLookup.Keys
+        // One representative item per row — whichever side has it — so the shared order can
+        // be produced by the same sorter a pane uses on its own listing.
+        var representatives = leftLookup.Keys
             .Union(rightLookup.Keys)
-            .OrderByDescending(k => k.IsDirectory)
-            .ThenBy(k => k.Name, StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
+            .Select(k => leftLookup.TryGetValue(k, out var l) ? l : rightLookup[k]);
+
+        // Both panes are kept on the same sort while synced, so either one's is fine.
+        var order = FileSorter.Sort(representatives, LeftPane.SortField, LeftPane.SortAscending).ToList();
 
         var leftRows = new List<FileSystemItem>(order.Count);
         var rightRows = new List<FileSystemItem>(order.Count);
 
-        foreach (var key in order)
+        foreach (var rep in order)
         {
+            var key = RowKey.For(rep);
             leftRows.Add(leftLookup.TryGetValue(key, out var l) ? l : FileSystemItem.Placeholder());
             rightRows.Add(rightLookup.TryGetValue(key, out var r) ? r : FileSystemItem.Placeholder());
         }

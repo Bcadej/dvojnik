@@ -67,11 +67,19 @@ Under each pane's address bar sits a strip of shortcuts. There are two ways to a
   selected item to the strip in the pane you right-clicked.
 
 Click a shortcut to jump straight to that folder (or open that file). Right-click a shortcut
-to remove it, or right-click the empty strip to clear them all.
+to **rename** it — giving it any label you like, without touching the target — or to remove
+it. Right-click the empty strip to clear them all.
 
 Each pane keeps its own list, remembered between sessions in
-`%AppData%\Dvojnik\shortcuts-Left.txt` and `shortcuts-Right.txt` — plain text, one path per
-line. Shortcuts whose target has disappeared are dropped quietly on the next start.
+`%AppData%\Dvojnik\bližnjice-levo.txt` and `bližnjice-desno.txt` — plain text, one entry per
+line as `path` or `path|custom name`. Shortcuts whose target has disappeared are dropped
+quietly on the next start.
+
+### Sorting
+Click any column header — **Name**, **Size**, **Type** or **Modified** — to sort by it; click
+again to reverse. An arrow marks the active column. Folders always stay above files, as in
+Explorer. In Sync View a sort applies to both panes at once, since aligned rows have to share
+one order.
 
 ### File operations
 Open, rename, delete (to the **Recycle Bin**, not permanently), copy, cut, paste and
@@ -80,7 +88,9 @@ create folders — from the right-click menu. The clipboard is shared across bot
 ### Bilingual
 Slovenian (`sl-SI`) is the primary language; British English (`en-GB`) is available from the
 **Jezik / Language** menu. Switching takes effect immediately — no restart — and your choice
-is remembered between sessions in `%AppData%\Dvojnik\language.txt`.
+is remembered between sessions in `%AppData%\Dvojnik\jezik.txt`. The settings files are named
+in Slovenian, like the app: `jezik.txt`, `bližnjice-levo.txt`, `bližnjice-desno.txt`.
+(Files from before 1.0.6 are migrated automatically on first run.)
 
 Dates follow the language: `16. 07. 2026` in Slovenian, `16/07/2026` in English.
 

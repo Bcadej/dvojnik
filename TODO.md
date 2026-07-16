@@ -31,6 +31,19 @@ Carried over — do these first.
   other side lacks). The test script lives in the session scratchpad — worth turning into a
   proper checked-in test one day (see below).
 
+## Done in 1.0.6
+
+- [x] **Settings files named in Slovenian**: `jezik.txt`, `bližnjice-levo.txt`,
+      `bližnjice-desno.txt`. Files from earlier versions are migrated on first run —
+      verified against real data (an existing shortcut list carried over intact).
+- [x] **Sortable columns**: click Name/Size/Type/Modified to sort, click again to reverse,
+      arrow marks the active column, folders stay on top. In Sync View both panes share the
+      sort, since aligned rows need one order. Every sort verified via automated header clicks.
+- [x] **Rename a shortcut** from its right-click menu; stored as `path|custom name`.
+      An empty name restores the default.
+- [x] About icon a third smaller (96 → 64px)
+- [x] Column headers expose their name to screen readers
+
 ## Done in 1.0.5
 
 - [x] **Fixed: blurry icon in About.** The real cause was WPF's `IconBitmapDecoder`, which
@@ -89,7 +102,6 @@ Carried over — do these first.
       no feedback and no way to cancel. Move transfers onto a background task.
 - [ ] **Overwrite prompt** — drag & drop silently renames on a name clash (` (2)`) and paste
       just fails. Offer Overwrite / Skip / Rename / Apply to all.
-- [ ] **Column sorting** — click a header to sort by name, size, type or date.
 - [ ] **Drive selector** — a drive dropdown per pane; currently you must type the path.
 - [ ] **Persist window layout** — remember size, splitter position and both panes' folders.
 - [ ] **Check in the UI Automation test** — the script that drove Sync View and read the

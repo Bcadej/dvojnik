@@ -53,6 +53,8 @@
                                     AutomationProperties.Name="{Binding Name}">
                                 <Button.ContextMenu>
                                     <ContextMenu>
+                                        <MenuItem Click="RenameShortcut_Click"
+                                                  Header="{Binding [Shortcut_Rename], Source={x:Static local:Loc.Instance}}"/>
                                         <MenuItem Click="RemoveShortcut_Click"
                                                   Header="{Binding [Shortcut_Remove], Source={x:Static local:Loc.Instance}}"/>
                                     </ContextMenu>
@@ -74,6 +76,7 @@
                   MouseDoubleClick="FileListView_MouseDoubleClick"
                   SelectionMode="Extended"
                   AllowDrop="True"
+                  GridViewColumnHeader.Click="ColumnHeader_Click"
                   PreviewMouseLeftButtonDown="FileListView_PreviewMouseLeftButtonDown"
                   PreviewMouseMove="FileListView_PreviewMouseMove"
                   DragOver="FileListView_DragOver"
@@ -108,8 +111,17 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="280"
-                                    Header="{Binding [Column_Name], Source={x:Static local:Loc.Instance}}">
+                    <GridViewColumn Width="280">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Tag="Name"
+                                    AutomationProperties.Name="{Binding [Column_Name], Source={x:Static local:Loc.Instance}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding [Column_Name], Source={x:Static local:Loc.Instance}}"/>
+                                    <TextBlock x:Name="NameSortArrow" Margin="5,0,0,0" FontSize="11"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -119,12 +131,42 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="90" DisplayMemberBinding="{Binding SizeLabel}"
-                                    Header="{Binding [Column_Size], Source={x:Static local:Loc.Instance}}"/>
-                    <GridViewColumn Width="120" DisplayMemberBinding="{Binding TypeLabel}"
-                                    Header="{Binding [Column_Type], Source={x:Static local:Loc.Instance}}"/>
-                    <GridViewColumn Width="160" DisplayMemberBinding="{Binding ModifiedLabel}"
-                                    Header="{Binding [Column_Modified], Source={x:Static local:Loc.Instance}}"/>
+                    <GridViewColumn Width="90" DisplayMemberBinding="{Binding SizeLabel}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Tag="Size"
+                                    AutomationProperties.Name="{Binding [Column_Size], Source={x:Static local:Loc.Instance}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding [Column_Size], Source={x:Static local:Loc.Instance}}"/>
+                                    <TextBlock x:Name="SizeSortArrow" Margin="5,0,0,0" FontSize="11"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="120" DisplayMemberBinding="{Binding TypeLabel}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Tag="Type"
+                                    AutomationProperties.Name="{Binding [Column_Type], Source={x:Static local:Loc.Instance}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding [Column_Type], Source={x:Static local:Loc.Instance}}"/>
+                                    <TextBlock x:Name="TypeSortArrow" Margin="5,0,0,0" FontSize="11"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="160" DisplayMemberBinding="{Binding ModifiedLabel}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Tag="Modified"
+                                    AutomationProperties.Name="{Binding [Column_Modified], Source={x:Static local:Loc.Instance}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding [Column_Modified], Source={x:Static local:Loc.Instance}}"/>
+                                    <TextBlock x:Name="ModifiedSortArrow" Margin="5,0,0,0" FontSize="11"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>

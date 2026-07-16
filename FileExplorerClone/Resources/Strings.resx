@@ -145,6 +145,12 @@
   <data name="Shortcut_Add" xml:space="preserve">
     <value>Dodaj v bližnjice tega podokna</value>
   </data>
+  <data name="Shortcut_Rename" xml:space="preserve">
+    <value>Preimenuj bližnjico</value>
+  </data>
+  <data name="Shortcut_RenameLabel" xml:space="preserve">
+    <value>Ime bližnjice (pustite prazno za privzeto):</value>
+  </data>
   <data name="Shortcut_Remove" xml:space="preserve">
     <value>Odstrani bližnjico</value>
   </data>
