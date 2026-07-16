@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- ===== Application ===== -->
+  <data name="App_Title" xml:space="preserve">
+    <value>Dual Pane Explorer</value>
+  </data>
+
+  <!-- ===== Main window toolbar ===== -->
+  <data name="Toolbar_SyncOff" xml:space="preserve">
+    <value>Sync View: OFF</value>
+  </data>
+  <data name="Toolbar_SyncOn" xml:space="preserve">
+    <value>Sync View: ON</value>
+  </data>
+  <data name="Toolbar_SwapPanes" xml:space="preserve">
+    <value>Swap Panes</value>
+  </data>
+
+  <!-- ===== Menus ===== -->
+  <data name="Menu_Language" xml:space="preserve">
+    <value>_Language</value>
+  </data>
+  <data name="Menu_Language_Slovenian" xml:space="preserve">
+    <value>Slovenian (sl-SI)</value>
+  </data>
+  <data name="Menu_Language_English" xml:space="preserve">
+    <value>English (en-GB)</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>_Help</value>
+  </data>
+  <data name="Menu_Help_About" xml:space="preserve">
+    <value>_About</value>
+  </data>
+
+  <!-- ===== About dialog ===== -->
+  <data name="About_Title" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="About_Version" xml:space="preserve">
+    <value>Version:</value>
+  </data>
+  <data name="About_BuildTime" xml:space="preserve">
+    <value>Build time:</value>
+  </data>
+  <data name="About_Location" xml:space="preserve">
+    <value>Location:</value>
+  </data>
+  <data name="About_LocationTooltip" xml:space="preserve">
+    <value>Click to open the containing folder</value>
+  </data>
+  <data name="About_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="About_Settings" xml:space="preserve">
+    <value>Language setting:</value>
+  </data>
+  <data name="About_SettingsTooltip" xml:space="preserve">
+    <value>Click to open the language setting file</value>
+  </data>
+  <data name="About_Description" xml:space="preserve">
+    <value>A dual-pane file manager for Windows.</value>
+  </data>
+
+  <!-- ===== Pane toolbar ===== -->
+  <data name="Pane_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Pane_Forward" xml:space="preserve">
+    <value>Forward</value>
+  </data>
+  <data name="Pane_Up" xml:space="preserve">
+    <value>Up one level</value>
+  </data>
+  <data name="Pane_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Pane_Go" xml:space="preserve">
+    <value>Go</value>
+  </data>
+
+  <!-- ===== Shortcut bar ===== -->
+  <data name="Shortcuts_Hint" xml:space="preserve">
+    <value>Drag folders or files here to add shortcuts</value>
+  </data>
+  <data name="Shortcut_Add" xml:space="preserve">
+    <value>Add to this pane's shortcuts</value>
+  </data>
+  <data name="Shortcut_Remove" xml:space="preserve">
+    <value>Remove shortcut</value>
+  </data>
+  <data name="Shortcut_RemoveAll" xml:space="preserve">
+    <value>Remove all shortcuts</value>
+  </data>
+  <data name="Shortcut_Missing" xml:space="preserve">
+    <value>This shortcut no longer exists:
+{0}
+
+It will be removed from the list.</value>
+  </data>
+  <data name="Shortcut_Title" xml:space="preserve">
+    <value>Shortcut</value>
+  </data>
+
+  <!-- ===== Column headers ===== -->
+  <data name="Column_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Column_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Column_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Column_Modified" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+
+  <!-- ===== Context menu ===== -->
+  <data name="Menu_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Menu_Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Menu_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Menu_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Menu_Cut" xml:space="preserve">
+    <value>Cut</value>
+  </data>
+  <data name="Menu_Paste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="Menu_NewFolder" xml:space="preserve">
+    <value>New Folder</value>
+  </data>
+
+  <!-- ===== Dialogs ===== -->
+  <data name="Dialog_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Rename_Title" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Rename_Label" xml:space="preserve">
+    <value>New name:</value>
+  </data>
+  <data name="NewFolder_Title" xml:space="preserve">
+    <value>New Folder</value>
+  </data>
+  <data name="NewFolder_Label" xml:space="preserve">
+    <value>Folder name:</value>
+  </data>
+  <data name="NewFolder_Default" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+
+  <!-- ===== Messages ===== -->
+  <data name="Msg_Navigate_Title" xml:space="preserve">
+    <value>Navigate</value>
+  </data>
+  <data name="Msg_PathNotFound" xml:space="preserve">
+    <value>Path not found:
+{0}</value>
+  </data>
+  <data name="Msg_AccessDenied" xml:space="preserve">
+    <value>Access denied.</value>
+  </data>
+  <data name="Msg_Open_Title" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Msg_CouldNotOpen" xml:space="preserve">
+    <value>Could not open file:
+{0}</value>
+  </data>
+  <data name="Msg_RenameFailed" xml:space="preserve">
+    <value>Rename failed:
+{0}</value>
+  </data>
+  <data name="Msg_Delete_Confirm" xml:space="preserve">
+    <value>Move {0} item(s) to the Recycle Bin?</value>
+  </data>
+  <data name="Msg_CouldNotDelete" xml:space="preserve">
+    <value>Could not delete {0}:
+{1}</value>
+  </data>
+  <data name="Msg_PasteFailed" xml:space="preserve">
+    <value>Paste failed for {0}:
+{1}</value>
+  </data>
+  <data name="Msg_CouldNotCreateFolder" xml:space="preserve">
+    <value>Could not create folder:
+{0}</value>
+  </data>
+  <data name="Msg_TransferFailed" xml:space="preserve">
+    <value>Could not transfer {0}:
+{1}</value>
+  </data>
+  <data name="Msg_Transfer_Title" xml:space="preserve">
+    <value>Drag and drop</value>
+  </data>
+  <data name="Msg_CannotDropOntoItself" xml:space="preserve">
+    <value>A folder cannot be moved into itself.</value>
+  </data>
+
+  <!-- ===== Status bar ===== -->
+  <data name="Status_SyncOn" xml:space="preserve">
+    <value>Panes will navigate together (relative to their current folders) and highlight differences.</value>
+  </data>
+  <data name="Status_InSync" xml:space="preserve">
+    <value>Panes in sync.</value>
+  </data>
+  <data name="Status_NoMatchingFolder" xml:space="preserve">
+    <value>No matching folder on the other side for “{0}” — that pane stayed put.</value>
+  </data>
+
+  <!-- ===== File system item labels ===== -->
+  <data name="Item_FileFolder" xml:space="preserve">
+    <value>File folder</value>
+  </data>
+  <data name="Item_FileSuffix" xml:space="preserve">
+    <value>{0} file</value>
+  </data>
+  <data name="Item_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+</root>

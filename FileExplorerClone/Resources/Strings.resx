@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- ===== Application ===== -->
+  <data name="App_Title" xml:space="preserve">
+    <value>Dvojnik</value>
+  </data>
+
+  <!-- ===== Main window toolbar ===== -->
+  <data name="Toolbar_SyncOff" xml:space="preserve">
+    <value>Sinhroni pogled: IZKLOPLJEN</value>
+  </data>
+  <data name="Toolbar_SyncOn" xml:space="preserve">
+    <value>Sinhroni pogled: VKLOPLJEN</value>
+  </data>
+  <data name="Toolbar_SwapPanes" xml:space="preserve">
+    <value>Zamenjaj podokni</value>
+  </data>
+
+  <!-- ===== Menus ===== -->
+  <data name="Menu_Language" xml:space="preserve">
+    <value>_Jezik</value>
+  </data>
+  <data name="Menu_Language_Slovenian" xml:space="preserve">
+    <value>Slovenščina (sl-SI)</value>
+  </data>
+  <data name="Menu_Language_English" xml:space="preserve">
+    <value>Angleščina (en-GB)</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>_Pomoč</value>
+  </data>
+  <data name="Menu_Help_About" xml:space="preserve">
+    <value>_O programu</value>
+  </data>
+
+  <!-- ===== About dialog ===== -->
+  <data name="About_Title" xml:space="preserve">
+    <value>O programu</value>
+  </data>
+  <data name="About_Version" xml:space="preserve">
+    <value>Različica:</value>
+  </data>
+  <data name="About_BuildTime" xml:space="preserve">
+    <value>Čas izgradnje:</value>
+  </data>
+  <data name="About_Location" xml:space="preserve">
+    <value>Lokacija:</value>
+  </data>
+  <data name="About_LocationTooltip" xml:space="preserve">
+    <value>Kliknite, da odprete mapo s programom</value>
+  </data>
+  <data name="About_Close" xml:space="preserve">
+    <value>Zapri</value>
+  </data>
+  <data name="About_Settings" xml:space="preserve">
+    <value>Nastavitev jezika:</value>
+  </data>
+  <data name="About_SettingsTooltip" xml:space="preserve">
+    <value>Kliknite, da odprete datoteko z nastavitvijo jezika</value>
+  </data>
+  <data name="About_Description" xml:space="preserve">
+    <value>Dvopodokenski upravitelj datotek za Windows.</value>
+  </data>
+
+  <!-- ===== Pane toolbar ===== -->
+  <data name="Pane_Back" xml:space="preserve">
+    <value>Nazaj</value>
+  </data>
+  <data name="Pane_Forward" xml:space="preserve">
+    <value>Naprej</value>
+  </data>
+  <data name="Pane_Up" xml:space="preserve">
+    <value>Raven navzgor</value>
+  </data>
+  <data name="Pane_Refresh" xml:space="preserve">
+    <value>Osveži</value>
+  </data>
+  <data name="Pane_Go" xml:space="preserve">
+    <value>Pojdi</value>
+  </data>
+
+  <!-- ===== Shortcut bar ===== -->
+  <data name="Shortcuts_Hint" xml:space="preserve">
+    <value>Povlecite mape ali datoteke sem za bližnjice</value>
+  </data>
+  <data name="Shortcut_Add" xml:space="preserve">
+    <value>Dodaj v bližnjice tega podokna</value>
+  </data>
+  <data name="Shortcut_Remove" xml:space="preserve">
+    <value>Odstrani bližnjico</value>
+  </data>
+  <data name="Shortcut_RemoveAll" xml:space="preserve">
+    <value>Odstrani vse bližnjice</value>
+  </data>
+  <data name="Shortcut_Missing" xml:space="preserve">
+    <value>Ta bližnjica ne obstaja več:
+{0}
+
+Odstranjena bo s seznama.</value>
+  </data>
+  <data name="Shortcut_Title" xml:space="preserve">
+    <value>Bližnjica</value>
+  </data>
+
+  <!-- ===== Column headers ===== -->
+  <data name="Column_Name" xml:space="preserve">
+    <value>Ime</value>
+  </data>
+  <data name="Column_Size" xml:space="preserve">
+    <value>Velikost</value>
+  </data>
+  <data name="Column_Type" xml:space="preserve">
+    <value>Vrsta</value>
+  </data>
+  <data name="Column_Modified" xml:space="preserve">
+    <value>Spremenjeno</value>
+  </data>
+
+  <!-- ===== Context menu ===== -->
+  <data name="Menu_Open" xml:space="preserve">
+    <value>Odpri</value>
+  </data>
+  <data name="Menu_Rename" xml:space="preserve">
+    <value>Preimenuj</value>
+  </data>
+  <data name="Menu_Delete" xml:space="preserve">
+    <value>Izbriši</value>
+  </data>
+  <data name="Menu_Copy" xml:space="preserve">
+    <value>Kopiraj</value>
+  </data>
+  <data name="Menu_Cut" xml:space="preserve">
+    <value>Izreži</value>
+  </data>
+  <data name="Menu_Paste" xml:space="preserve">
+    <value>Prilepi</value>
+  </data>
+  <data name="Menu_NewFolder" xml:space="preserve">
+    <value>Nova mapa</value>
+  </data>
+
+  <!-- ===== Dialogs ===== -->
+  <data name="Dialog_OK" xml:space="preserve">
+    <value>V redu</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>Prekliči</value>
+  </data>
+  <data name="Rename_Title" xml:space="preserve">
+    <value>Preimenuj</value>
+  </data>
+  <data name="Rename_Label" xml:space="preserve">
+    <value>Novo ime:</value>
+  </data>
+  <data name="NewFolder_Title" xml:space="preserve">
+    <value>Nova mapa</value>
+  </data>
+  <data name="NewFolder_Label" xml:space="preserve">
+    <value>Ime mape:</value>
+  </data>
+  <data name="NewFolder_Default" xml:space="preserve">
+    <value>Nova mapa</value>
+  </data>
+
+  <!-- ===== Messages ===== -->
+  <data name="Msg_Navigate_Title" xml:space="preserve">
+    <value>Krmarjenje</value>
+  </data>
+  <data name="Msg_PathNotFound" xml:space="preserve">
+    <value>Pot ni bila najdena:
+{0}</value>
+  </data>
+  <data name="Msg_AccessDenied" xml:space="preserve">
+    <value>Dostop zavrnjen.</value>
+  </data>
+  <data name="Msg_Open_Title" xml:space="preserve">
+    <value>Odpiranje</value>
+  </data>
+  <data name="Msg_CouldNotOpen" xml:space="preserve">
+    <value>Datoteke ni bilo mogoče odpreti:
+{0}</value>
+  </data>
+  <data name="Msg_RenameFailed" xml:space="preserve">
+    <value>Preimenovanje ni uspelo:
+{0}</value>
+  </data>
+  <data name="Msg_Delete_Confirm" xml:space="preserve">
+    <value>Ali želite premakniti {0} elementov v koš?</value>
+  </data>
+  <data name="Msg_CouldNotDelete" xml:space="preserve">
+    <value>Elementa {0} ni bilo mogoče izbrisati:
+{1}</value>
+  </data>
+  <data name="Msg_PasteFailed" xml:space="preserve">
+    <value>Lepljenje ni uspelo za {0}:
+{1}</value>
+  </data>
+  <data name="Msg_CouldNotCreateFolder" xml:space="preserve">
+    <value>Mape ni bilo mogoče ustvariti:
+{0}</value>
+  </data>
+  <data name="Msg_TransferFailed" xml:space="preserve">
+    <value>Prenos elementa {0} ni uspel:
+{1}</value>
+  </data>
+  <data name="Msg_Transfer_Title" xml:space="preserve">
+    <value>Povleci in spusti</value>
+  </data>
+  <data name="Msg_CannotDropOntoItself" xml:space="preserve">
+    <value>Mape ni mogoče premakniti vase.</value>
+  </data>
+
+  <!-- ===== Status bar ===== -->
+  <data name="Status_SyncOn" xml:space="preserve">
+    <value>Podokni bosta krmarili skupaj (relativno glede na trenutni mapi) in označevali razlike.</value>
+  </data>
+  <data name="Status_InSync" xml:space="preserve">
+    <value>Podokni sta sinhronizirani.</value>
+  </data>
+  <data name="Status_NoMatchingFolder" xml:space="preserve">
+    <value>Na drugi strani ni ustrezne mape za »{0}« – to podokno je ostalo na mestu.</value>
+  </data>
+
+  <!-- ===== File system item labels ===== -->
+  <data name="Item_FileFolder" xml:space="preserve">
+    <value>Mapa</value>
+  </data>
+  <data name="Item_FileSuffix" xml:space="preserve">
+    <value>Datoteka {0}</value>
+  </data>
+  <data name="Item_File" xml:space="preserve">
+    <value>Datoteka</value>
+  </data>
+</root>

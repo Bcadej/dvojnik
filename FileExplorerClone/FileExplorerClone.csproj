@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Version.props" />
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Resources\Dvojnik.ico</ApplicationIcon>
+    <!-- The shipped executable is Dvojnik.exe. RootNamespace stays FileExplorerClone
+         so the embedded resource names (FileExplorerClone.Resources.Strings) keep working. -->
+    <AssemblyName>Dvojnik</AssemblyName>
+    <RootNamespace>FileExplorerClone</RootNamespace>
+
+    <!-- Slovenian is the app's primary language: the neutral resx *is* sl-SI,
+         so it is used whenever no better satellite matches. -->
+    <NeutralLanguage>sl-SI</NeutralLanguage>
+    <SatelliteResourceLanguages>en-GB</SatelliteResourceLanguages>
+
+    <Product>Dvojnik</Product>
+    <AssemblyTitle>Dvojnik — Dual Pane Explorer</AssemblyTitle>
+    <Company>Bcadej</Company>
+    <Copyright>Copyright © 2026 Bcadej</Copyright>
+  </PropertyGroup>
+
+  <!-- Ship a single .exe with the runtime bundled in, so target machines need no .NET install.
+       Scoped to publish so day-to-day builds stay framework-dependent and fast. -->
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <!-- Bake the build timestamp into the assembly; AppInfo reads it back for Help > About. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="BuildTime" Value="$([System.DateTime]::UtcNow.ToString('O'))" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings.en-GB.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Dvojnik.ico" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,50 @@
+<Application x:Class="FileExplorerClone.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+
+        <!-- Base font size for the whole app. Most controls inherit this from the
+             Window; the styles below cover the ones that don't. -->
+        <sys:Double x:Key="AppFontSize">15</sys:Double>
+        <sys:Double x:Key="AppHeaderFontSize">15</sys:Double>
+
+        <Style TargetType="GridViewColumnHeader">
+            <Setter Property="FontSize" Value="{StaticResource AppHeaderFontSize}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style TargetType="ListViewItem">
+            <Setter Property="FontSize" Value="{StaticResource AppFontSize}"/>
+            <Setter Property="Padding" Value="4,3"/>
+        </Style>
+
+        <Style TargetType="MenuItem">
+            <Setter Property="FontSize" Value="{StaticResource AppFontSize}"/>
+        </Style>
+
+        <Style TargetType="ToolTip">
+            <Setter Property="FontSize" Value="{StaticResource AppFontSize}"/>
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="{StaticResource AppFontSize}"/>
+        </Style>
+
+        <Style TargetType="ToggleButton">
+            <Setter Property="FontSize" Value="{StaticResource AppFontSize}"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize" Value="{StaticResource AppFontSize}"/>
+            <Setter Property="Padding" Value="3,2"/>
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource AppFontSize}"/>
+        </Style>
+
+    </Application.Resources>
+</Application>

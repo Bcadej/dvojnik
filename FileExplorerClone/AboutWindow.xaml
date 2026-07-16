@@ -1,0 +1,70 @@
+<Window x:Class="FileExplorerClone.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:FileExplorerClone"
+        Title="{Binding [About_Title], Source={x:Static local:Loc.Instance}}"
+        SizeToContent="Height" Width="560"
+        FontSize="{StaticResource AppFontSize}"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        ShowInTaskbar="False" Icon="Resources/Dvojnik.ico">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- header -->
+            <RowDefinition Height="Auto"/>  <!-- version -->
+            <RowDefinition Height="Auto"/>  <!-- build time -->
+            <RowDefinition Height="Auto"/>  <!-- location -->
+            <RowDefinition Height="Auto"/>  <!-- language setting file -->
+            <RowDefinition Height="Auto"/>  <!-- separator -->
+            <RowDefinition Height="Auto"/>  <!-- close -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Header: icon + app name -->
+        <Image Grid.Row="0" Grid.Column="0" Source="Resources/Dvojnik.ico"
+               Width="48" Height="48" Margin="0,0,14,14" VerticalAlignment="Top"/>
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,14">
+            <TextBlock x:Name="AppNameText" FontSize="22" FontWeight="SemiBold"/>
+            <TextBlock Text="{Binding [About_Description], Source={x:Static local:Loc.Instance}}"
+                       Foreground="Gray" TextWrapping="Wrap" Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <!-- Version -->
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,12,6" FontWeight="SemiBold"
+                   Text="{Binding [About_Version], Source={x:Static local:Loc.Instance}}"/>
+        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" x:Name="VersionText"/>
+
+        <!-- Build time -->
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,12,6" FontWeight="SemiBold"
+                   Text="{Binding [About_BuildTime], Source={x:Static local:Loc.Instance}}"/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,6" x:Name="BuildTimeText"/>
+
+        <!-- Location (clickable: opens the containing folder) -->
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,12,6" FontWeight="SemiBold"
+                   Text="{Binding [About_Location], Source={x:Static local:Loc.Instance}}"/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,6" TextWrapping="Wrap">
+            <Hyperlink x:Name="LocationLink" Click="LocationLink_Click"
+                       ToolTip="{Binding [About_LocationTooltip], Source={x:Static local:Loc.Instance}}">
+                <Run x:Name="LocationRun"/>
+            </Hyperlink>
+        </TextBlock>
+
+        <!-- Language setting file (clickable: opens the .txt) -->
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,12,6" FontWeight="SemiBold"
+                   Text="{Binding [About_Settings], Source={x:Static local:Loc.Instance}}"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,0,0,6" TextWrapping="Wrap">
+            <Hyperlink x:Name="SettingsLink" Click="SettingsLink_Click"
+                       ToolTip="{Binding [About_SettingsTooltip], Source={x:Static local:Loc.Instance}}">
+                <Run x:Name="SettingsRun"/>
+            </Hyperlink>
+        </TextBlock>
+
+        <Separator Grid.Row="5" Grid.ColumnSpan="2" Margin="0,10,0,10"/>
+
+        <Button Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right"
+                MinWidth="90" Padding="10,4" IsDefault="True" IsCancel="True"
+                Content="{Binding [About_Close], Source={x:Static local:Loc.Instance}}"/>
+    </Grid>
+</Window>

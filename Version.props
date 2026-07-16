@@ -1,0 +1,8 @@
+<Project>
+  <!-- Single source of truth for the app version.
+       publish.ps1 bumps the patch number here before every publish,
+       so the artefact you hand out always carries a fresh version. -->
+  <PropertyGroup>
+    <VersionPrefix>1.0.3</VersionPrefix>
+  </PropertyGroup>
+</Project>
