@@ -74,6 +74,7 @@
         <ListView x:Name="FileListView"
                   DockPanel.Dock="Bottom"
                   MouseDoubleClick="FileListView_MouseDoubleClick"
+                  PreviewKeyDown="FileListView_PreviewKeyDown"
                   SelectionMode="Extended"
                   AllowDrop="True"
                   GridViewColumnHeader.Click="ColumnHeader_Click"
@@ -84,6 +85,14 @@
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
                     <Setter Property="Background" Value="{Binding CompareState, Converter={StaticResource CompareBrushConverter}}"/>
+                    <Style.Triggers>
+                        <!-- Sync View spacers are not real rows: the arrow keys must step
+                             straight over them, and they must never be selectable. -->
+                        <DataTrigger Binding="{Binding IsPlaceholder}" Value="True">
+                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.ContextMenu>

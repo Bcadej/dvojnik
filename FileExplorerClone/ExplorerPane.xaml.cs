@@ -221,28 +221,52 @@ public partial class ExplorerPane : UserControl
 
     // ----- Toolbar handlers -----
 
-    private void BackButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (_historyIndex > 0)
-        {
-            _historyIndex--;
-            GoTo(_history[_historyIndex], pushHistory: false);
-        }
-    }
+    private void BackButton_Click(object sender, RoutedEventArgs e) => GoBack();
 
-    private void ForwardButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (_historyIndex < _history.Count - 1)
-        {
-            _historyIndex++;
-            GoTo(_history[_historyIndex], pushHistory: false);
-        }
-    }
+    private void ForwardButton_Click(object sender, RoutedEventArgs e) => GoForward();
 
-    private void UpButton_Click(object sender, RoutedEventArgs e)
+    private void UpButton_Click(object sender, RoutedEventArgs e) => GoUp();
+
+    /// <summary>
+    /// Moves to the parent folder and selects the folder just left, so you can walk up and
+    /// down a tree without losing your place.
+    /// </summary>
+    public void GoUp()
     {
         var parent = Directory.GetParent(CurrentPath);
-        if (parent != null) NavigateTo(parent.FullName);
+        if (parent == null) return;
+
+        var cameFrom = Path.GetFileName(Path.TrimEndingDirectorySeparator(CurrentPath));
+        NavigateTo(parent.FullName);
+        SelectByName(cameFrom);
+    }
+
+    private void GoBack()
+    {
+        if (_historyIndex <= 0) return;
+        _historyIndex--;
+        GoTo(_history[_historyIndex], pushHistory: false);
+    }
+
+    private void GoForward()
+    {
+        if (_historyIndex >= _history.Count - 1) return;
+        _historyIndex++;
+        GoTo(_history[_historyIndex], pushHistory: false);
+    }
+
+    /// <summary>Selects a row by name and scrolls it into view, if it is there.</summary>
+    private void SelectByName(string? name)
+    {
+        if (string.IsNullOrEmpty(name)) return;
+
+        var match = Items.FirstOrDefault(i =>
+            !i.IsPlaceholder && string.Equals(i.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (match == null) return;
+
+        FileListView.SelectedItem = match;
+        FileListView.ScrollIntoView(match);
+        FocusSelectedRow();
     }
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e) => Refresh();
@@ -264,6 +288,143 @@ public partial class ExplorerPane : UserControl
     {
         if (FileListView.SelectedItem is FileSystemItem { IsPlaceholder: false } item)
             OpenItem(item);
+    }
+
+    // ----- Keyboard -----
+
+    /// <summary>
+    /// Keyboard browsing. Up/Down/Home/End/type-ahead come free from the ListView; blank
+    /// spacer rows are skipped because their containers are not focusable.
+    ///
+    /// Bound to the list rather than the window so that typing in the address bar keeps
+    /// working normally (Backspace especially). Tunnelling (Preview) rather than bubbling,
+    /// because the ListView's inner ScrollViewer swallows Left/Right to scroll sideways and
+    /// would eat Alt+Left/Right before they ever reached us.
+    /// </summary>
+    private void FileListView_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        // With a modifier held, WPF reports Key.System and puts the real key in SystemKey.
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
+        bool alt = (Keyboard.Modifiers & ModifierKeys.Alt) != 0;
+        bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
+
+        switch (key)
+        {
+            // --- Browsing ---
+            case Key.Enter:
+                if (FileListView.SelectedItem is FileSystemItem { IsPlaceholder: false } item)
+                    OpenItem(item);
+                e.Handled = true;
+                break;
+
+            case Key.Back:                       // Backspace: up one level
+                GoUp();
+                e.Handled = true;
+                break;
+
+            case Key.Up when alt:                // Alt+Up: up one level (Explorer's binding)
+                GoUp();
+                e.Handled = true;
+                break;
+
+            case Key.Left when alt:              // Alt+Left / Alt+Right: history
+                GoBack();
+                e.Handled = true;
+                break;
+
+            case Key.Right when alt:
+                GoForward();
+                e.Handled = true;
+                break;
+
+            case Key.Tab:                        // Tab: jump to the other pane
+                SwitchPaneRequested?.Invoke(this);
+                e.Handled = true;
+                break;
+
+            // --- Actions ---
+            case Key.F5:
+                Refresh();
+                e.Handled = true;
+                break;
+
+            case Key.F2:
+                RenameSelected();
+                e.Handled = true;
+                break;
+
+            case Key.Delete:
+                DeleteSelected();
+                e.Handled = true;
+                break;
+
+            case Key.F7:                         // F7 / Ctrl+Shift+N: new folder
+                NewFolder();
+                e.Handled = true;
+                break;
+
+            case Key.N when ctrl && shift:
+                NewFolder();
+                e.Handled = true;
+                break;
+
+            case Key.C when ctrl:
+                CopySelection(cut: false);
+                e.Handled = true;
+                break;
+
+            case Key.X when ctrl:
+                CopySelection(cut: true);
+                e.Handled = true;
+                break;
+
+            case Key.V when ctrl:
+                PasteHere();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    /// <summary>Raised when the user asks to move to the other pane (Tab).</summary>
+    public event Action<ExplorerPane>? SwitchPaneRequested;
+
+    /// <summary>Puts keyboard focus on this pane's list, selecting a row if none is current.</summary>
+    public void FocusList()
+    {
+        if (FileListView.SelectedItem is not FileSystemItem { IsPlaceholder: false })
+        {
+            var first = Items.FirstOrDefault(i => !i.IsPlaceholder);
+            if (first != null) FileListView.SelectedItem = first;
+        }
+
+        FileListView.Focus();
+        FocusSelectedRow();
+    }
+
+    /// <summary>Moves focus onto the selected row's container so the arrow keys act on it.</summary>
+    private void FocusSelectedRow()
+    {
+        if (FileListView.SelectedItem is null) return;
+
+        FileListView.ScrollIntoView(FileListView.SelectedItem);
+
+        // The container may not exist yet if the list was just rebuilt.
+        if (FileListView.ItemContainerGenerator.ContainerFromItem(FileListView.SelectedItem)
+            is ListViewItem row)
+        {
+            row.Focus();
+        }
+        else
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (FileListView.SelectedItem is not null &&
+                    FileListView.ItemContainerGenerator.ContainerFromItem(FileListView.SelectedItem)
+                        is ListViewItem later)
+                    later.Focus();
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
     }
 
     private void OpenItem(FileSystemItem item)
@@ -593,7 +754,9 @@ public partial class ExplorerPane : UserControl
         if (FileListView.SelectedItem is FileSystemItem { IsPlaceholder: false } item) OpenItem(item);
     }
 
-    private void RenameMenuItem_Click(object sender, RoutedEventArgs e)
+    private void RenameMenuItem_Click(object sender, RoutedEventArgs e) => RenameSelected();
+
+    private void RenameSelected()
     {
         if (FileListView.SelectedItem is not FileSystemItem { IsPlaceholder: false } item) return;
 
@@ -614,7 +777,9 @@ public partial class ExplorerPane : UserControl
         }
     }
 
-    private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
+    private void DeleteMenuItem_Click(object sender, RoutedEventArgs e) => DeleteSelected();
+
+    private void DeleteSelected()
     {
         var selected = SelectedRealItems();
         if (selected.Count == 0) return;
@@ -643,21 +808,23 @@ public partial class ExplorerPane : UserControl
         FileSystemChanged?.Invoke();
     }
 
-    private void CopyMenuItem_Click(object sender, RoutedEventArgs e)
+    private void CopyMenuItem_Click(object sender, RoutedEventArgs e) => CopySelection(cut: false);
+
+    private void CutMenuItem_Click(object sender, RoutedEventArgs e) => CopySelection(cut: true);
+
+    private void CopySelection(bool cut)
     {
+        var paths = SelectedRealItems().Select(i => i.FullPath).ToList();
+        if (paths.Count == 0) return;
+
         ClipboardPaths.Clear();
-        ClipboardPaths.AddRange(SelectedRealItems().Select(i => i.FullPath));
-        _clipboardIsCut = false;
+        ClipboardPaths.AddRange(paths);
+        _clipboardIsCut = cut;
     }
 
-    private void CutMenuItem_Click(object sender, RoutedEventArgs e)
-    {
-        ClipboardPaths.Clear();
-        ClipboardPaths.AddRange(SelectedRealItems().Select(i => i.FullPath));
-        _clipboardIsCut = true;
-    }
+    private void PasteMenuItem_Click(object sender, RoutedEventArgs e) => PasteHere();
 
-    private void PasteMenuItem_Click(object sender, RoutedEventArgs e)
+    private void PasteHere()
     {
         if (ClipboardPaths.Count == 0) return;
 
@@ -700,7 +867,9 @@ public partial class ExplorerPane : UserControl
             CopyDirectoryRecursive(subDir, Path.Combine(destDir, Path.GetFileName(subDir)));
     }
 
-    private void NewFolderMenuItem_Click(object sender, RoutedEventArgs e)
+    private void NewFolderMenuItem_Click(object sender, RoutedEventArgs e) => NewFolder();
+
+    private void NewFolder()
     {
         var name = PromptDialog.Show(Strings.Get("NewFolder_Title"), Strings.Get("NewFolder_Label"),
             Strings.Get("NewFolder_Default"));

@@ -24,14 +24,27 @@ public partial class MainWindow : Window
         LeftPane.SortChanged += OnPaneSortChanged;
         RightPane.SortChanged += OnPaneSortChanged;
 
+        LeftPane.SwitchPaneRequested += OnSwitchPaneRequested;
+        RightPane.SwitchPaneRequested += OnSwitchPaneRequested;
+
         LanguageManager.LanguageChanged += OnLanguageChanged;
         Closed += (_, _) => LanguageManager.LanguageChanged -= OnLanguageChanged;
 
         SyncLanguageMenuChecks();
 
         // Initial compare pass once both panes have loaded their startup folder.
-        Loaded += (_, _) => CompareAndHighlight();
+        Loaded += (_, _) =>
+        {
+            CompareAndHighlight();
+
+            // Start with the keyboard already in the left pane's list.
+            LeftPane.FocusList();
+        };
     }
+
+    /// <summary>Tab in one pane's list moves the keyboard to the other pane.</summary>
+    private void OnSwitchPaneRequested(ExplorerPane source)
+        => (ReferenceEquals(source, LeftPane) ? RightPane : LeftPane).FocusList();
 
     // ----- Language -----
 

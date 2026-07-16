@@ -81,6 +81,31 @@ again to reverse. An arrow marks the active column. Folders always stay above fi
 Explorer. In Sync View a sort applies to both panes at once, since aligned rows have to share
 one order.
 
+### Keyboard
+
+The file list is fully keyboard-driven — the keys are Explorer's, so they should already be
+in your fingers. Everything below acts on the pane that has focus.
+
+| Key | Does |
+|---|---|
+| **↑ / ↓** | Move the selection. Works whatever the sort order is, and steps over the blank spacer rows in Sync View. |
+| **Enter** | Open — enter a folder, or launch a file |
+| **Backspace** | Up one level, and the folder you just left is selected, so you can walk a tree without losing your place |
+| **Alt + ↑** | Up one level (Explorer's binding, same thing) |
+| **Alt + ← / →** | Back / forward through history |
+| **Tab** | Jump to the other pane |
+| **Home / End** | First / last row |
+| **Type a name** | Jump to the first matching row |
+| **F5** | Refresh |
+| **F2** | Rename |
+| **Delete** | Delete to the Recycle Bin |
+| **Ctrl + C / X / V** | Copy / cut / paste |
+| **F7** or **Ctrl + Shift + N** | New folder |
+
+Backspace, Enter and the arrows sit under one hand, so browsing needs no reaching. The keys
+are bound to the file list rather than the window, so typing in the address bar behaves
+normally — Backspace still deletes characters there.
+
 ### File operations
 Open, rename, delete (to the **Recycle Bin**, not permanently), copy, cut, paste and
 create folders — from the right-click menu. The clipboard is shared across both panes.

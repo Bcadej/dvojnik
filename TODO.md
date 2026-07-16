@@ -31,6 +31,25 @@ Carried over — do these first.
   other side lacks). The test script lives in the session scratchpad — worth turning into a
   proper checked-in test one day (see below).
 
+## Done in 1.0.7
+
+- [x] **Keyboard browsing**: Enter opens, Backspace and Alt+Up go up a level, Alt+Left/Right
+      walk history, Tab switches pane, F5/F2/Delete/Ctrl+C/X/V/F7 wired to the existing
+      actions. Up/Down verified to work regardless of sort order.
+- [x] Going up selects the folder you came from
+- [x] Blank Sync View spacers are non-focusable, so the arrow keys step over them
+- [x] The left pane's list takes focus at startup, so the keyboard works immediately
+- [x] **Fixed: Alt+Left/Right were dead** — the ListView's inner ScrollViewer eats Left/Right
+      to scroll sideways and marked them handled before they bubbled up. Now bound to
+      PreviewKeyDown so they tunnel in first. Caught by an automated key test.
+
+### Verified by driving real keystrokes
+
+Up/Down move the selection, Enter enters a folder, Backspace returns and re-selects the
+folder just left, Alt+Up climbs, Alt+Left/Right walk history, Tab moves to the other pane.
+The action keys (F2, Delete, Ctrl+C/X/V, F7) call the same methods as the context menu,
+which is exercised, but the key bindings themselves were not individually driven.
+
 ## Done in 1.0.6
 
 - [x] **Settings files named in Slovenian**: `jezik.txt`, `bližnjice-levo.txt`,
@@ -96,8 +115,9 @@ Carried over — do these first.
 
 ## Next up
 
-- [ ] **Keyboard shortcuts** — F5 copy, F6 move, F7 new folder, F8/Del delete, Tab to switch
-      pane, Alt+Left/Right for history. The classic Commander bindings.
+- [ ] **Classic Commander function keys** — F5 copy, F6 move, F8 delete. Not done, and they
+      would clash with the Explorer-style keys now in place (F5 refreshes). Worth deciding
+      which convention this app follows rather than half-doing both.
 - [ ] **Progress dialogue for long transfers** — big copies currently block the UI thread with
       no feedback and no way to cancel. Move transfers onto a background task.
 - [ ] **Overwrite prompt** — drag & drop silently renames on a name clash (` (2)`) and paste
