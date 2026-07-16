@@ -31,6 +31,20 @@ Carried over — do these first.
   other side lacks). The test script lives in the session scratchpad — worth turning into a
   proper checked-in test one day (see below).
 
+## Done in 1.0.5
+
+- [x] **Fixed: blurry icon in About.** The real cause was WPF's `IconBitmapDecoder`, which
+      decodes the *smallest* `.ico` frame and upscales it — `DecodePixelWidth="256"` does not
+      override this, so the 1.0.4 attempt achieved nothing. The dialog now uses a dedicated
+      256px PNG, rendered at 96px. Confirmed by screenshotting the dialog.
+- [x] Icon generator moved into the repo at `tools/make-icon.ps1`, emitting both artefacts
+- [x] **Language setting link now opens the containing folder** (file selected), matching the
+      executable link; both share one `RevealInExplorer` helper
+
+## Done in 1.0.4
+
+- [x] Enlarged the About icon (ineffective at fixing the blur — see 1.0.5)
+
 ## Done in 1.0.3
 
 - [x] **Repo connected to git and pushed** to https://github.com/Bcadej/dvojnik.git

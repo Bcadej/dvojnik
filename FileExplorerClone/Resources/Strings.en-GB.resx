@@ -115,7 +115,7 @@
     <value>Language setting:</value>
   </data>
   <data name="About_SettingsTooltip" xml:space="preserve">
-    <value>Click to open the language setting file</value>
+    <value>Click to open the folder containing the setting file</value>
   </data>
   <data name="About_Description" xml:space="preserve">
     <value>A dual-pane file manager for Windows.</value>

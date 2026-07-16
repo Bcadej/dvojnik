@@ -84,9 +84,9 @@ is remembered between sessions in `%AppData%\Dvojnik\language.txt`.
 
 Dates follow the language: `16. 07. 2026` in Slovenian, `16/07/2026` in English.
 
-**Help → About** shows the version, the build time and the full path of the running `.exe`
-(click it to open its folder), plus the path of the language setting file — click that to
-open `language.txt` and inspect or edit the setting by hand.
+**Help → About** shows the version, the build time and the full path of the running `.exe`,
+plus the path of the language setting file. Both paths are clickable and open Explorer at
+the containing folder with the file selected.
 
 ---
 
@@ -142,6 +142,16 @@ for real releases.
 | [`FileExplorerClone/Resources/Strings.en-GB.resx`](FileExplorerClone/Resources/Strings.en-GB.resx) | British English strings |
 | [`Version.props`](Version.props) | The version number |
 | [`publish.ps1`](publish.ps1) | Bump + publish |
+| [`tools/make-icon.ps1`](tools/make-icon.ps1) | Regenerates the app icon (`.ico` + `.png`) |
+
+### Why the icon ships twice
+
+`Resources/Dvojnik.ico` (frames 16–256px) is used for the executable and window chrome,
+where the Windows shell picks a sensible frame. `Resources/Dvojnik-256.png` exists because
+WPF will not pick one: `IconBitmapDecoder` decodes the **smallest** frame and upscales it —
+even when `DecodePixelWidth` explicitly asks for 256 — which looks blurry. Anywhere WPF
+renders the logo at size (the About dialog) uses the PNG. Both come from
+`tools/make-icon.ps1`; re-run it after changing the artwork.
 
 ### How localisation works
 
