@@ -206,6 +206,14 @@ Header="{Binding [Menu_Help], Source={x:Static local:Loc.Instance}}"
 
 ---
 
+## Project documents
+
+| File | What it is |
+|---|---|
+| [`CHANGELOG.md`](CHANGELOG.md) | What changed in each version |
+| [`TODO.md`](TODO.md) | What is planned, and what is verified vs. not |
+| [`docs/ideas.md`](docs/ideas.md) | Suggestions not committed to — keyboard extras, search |
+
 ## Licence
 
 Not yet specified.

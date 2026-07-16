@@ -132,7 +132,9 @@ which is exercised, but the key bindings themselves were not individually driven
 ## Later
 
 - [ ] **Tabs per pane**
-- [ ] **Filter / search box** to narrow the current listing
+- [ ] **Filter / search box** to narrow the current listing — see
+      [docs/ideas.md](docs/ideas.md#search) for the two variants (filter the current folder
+      vs. search a tree) and what each costs
 - [ ] **Real file-type icons** from the shell instead of the two emoji glyphs
 - [ ] **Compare by content** (hash) rather than just size + modified date
 - [ ] **Watch folders** with `FileSystemWatcher` so listings update themselves
