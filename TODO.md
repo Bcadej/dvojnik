@@ -6,9 +6,6 @@ Ideas and known gaps, roughly in priority order. Tick items off as they land.
 
 Carried over — do these first.
 
-- [ ] **Connect the repo to git and push** — `git init`, commit, add the remote
-      `https://github.com/Bcadej/dvojnik.git` and push. Nothing is under version control yet;
-      the push will need GitHub credentials.
 - [ ] **Hands-on check of drag & drop between the panes** — dropping onto the *shortcut bar*
       is now verified by an automated drag, but pane-to-pane transfers are not. Verify:
   - [ ] Plain drag between panes copies
@@ -36,6 +33,9 @@ Carried over — do these first.
 
 ## Done in 1.0.3
 
+- [x] **Repo connected to git and pushed** to https://github.com/Bcadej/dvojnik.git
+      (branch `main`). Build output and `publish/` are ignored; `.gitattributes` normalises
+      line endings.
 - [x] **Fixed: dropping on the shortcut bar did nothing.** A pane started its drag allowing
       only Copy|Move, so the bar's Link answer was downgraded to None and the drop refused.
       Drags from Explorer worked (Explorer allows Link), which is why it slipped through.
