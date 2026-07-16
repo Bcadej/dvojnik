@@ -22,9 +22,17 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Header: icon + app name -->
-        <Image Grid.Row="0" Grid.Column="0" Source="Resources/Dvojnik.ico"
-               Width="48" Height="48" Margin="0,0,14,14" VerticalAlignment="Top"/>
+        <!-- Header: icon + app name.
+             The .ico holds several frames; without DecodePixelWidth WPF picks a small one
+             and scales it up, which looks blurry. Force the 256px frame and scale it down. -->
+        <Image Grid.Row="0" Grid.Column="0"
+               Width="80" Height="80" Margin="0,0,18,16" VerticalAlignment="Top"
+               RenderOptions.BitmapScalingMode="HighQuality">
+            <Image.Source>
+                <BitmapImage UriSource="Resources/Dvojnik.ico"
+                             DecodePixelWidth="256" DecodePixelHeight="256"/>
+            </Image.Source>
+        </Image>
         <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,14">
             <TextBlock x:Name="AppNameText" FontSize="22" FontWeight="SemiBold"/>
             <TextBlock Text="{Binding [About_Description], Source={x:Static local:Loc.Instance}}"
