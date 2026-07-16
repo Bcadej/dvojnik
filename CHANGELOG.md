@@ -7,6 +7,17 @@ bare dual-pane explorer (two panes, Sync View, context-menu file operations, Eng
 
 ---
 
+## 1.0.8 — Rebuild, no functional change
+
+- **No code changes.** A clean rebuild of the 1.0.7 feature set.
+- Fixes the build stamp: 1.0.7 was published *before* its own keyboard-browsing commit was
+  made, so the exe embedded the previous commit hash (`1.0.7+03356c1`) and pointed at the
+  wrong source. Publishing after committing means 1.0.8 carries the commit it was actually
+  built from.
+- Documentation added in this round: `CHANGELOG.md` (this file) and `docs/ideas.md`, which
+  parks the keyboard extras and the two meanings of "search" (filter the current folder vs.
+  walk a tree). Neither search variant is built — both were declined for now.
+
 ## 1.0.7 — Keyboard browsing
 
 - **Enter** opens the selected item, **Backspace** and **Alt+↑** go up a level, **Alt+←/→**
