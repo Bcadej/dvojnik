@@ -40,6 +40,19 @@ public class FileSystemItem : INotifyPropertyChanged
 
     public string Icon => IsPlaceholder ? "" : IsDirectory ? "\U0001F4C1" : "\U0001F4C4"; // folder / file glyph
 
+    /// <summary>
+    /// True when the name ends with a space or a dot. Windows tolerates such names on some
+    /// file systems and WebDAV shares create them, but its path normalisation silently trims a
+    /// trailing space/dot off the last path segment — so an ordinary delete or rename ends up
+    /// targeting the wrong name and fails. Flagged so the user can rename the file to fix it.
+    /// </summary>
+    public bool HasProblematicName =>
+        !IsPlaceholder && Name.Length > 0 && (Name[^1] == ' ' || Name[^1] == '.');
+
+    /// <summary>Explains the <see cref="HasProblematicName"/> flag; null (no tooltip) when the name is fine.</summary>
+    public string? NameWarningTooltip =>
+        HasProblematicName ? Strings.Get("Warn_TrailingSpaceDot") : null;
+
     private CompareState _compareState = CompareState.Normal;
     public CompareState CompareState
     {
@@ -61,6 +74,7 @@ public class FileSystemItem : INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TypeLabel)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ModifiedLabel)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameWarningTooltip)));
     }
 
     private static string FormatSize(long bytes)
@@ -85,18 +99,27 @@ public class FileSystemItem : INotifyPropertyChanged
     /// <summary>An empty row used to align the two panes in Sync View.</summary>
     public static FileSystemItem Placeholder() => new() { IsPlaceholder = true };
 
+    /// <summary>
+    /// Removes trailing NUL characters from a name or path. The Windows WebDAV (DavWWWRoot)
+    /// redirector returns every enumerated entry with a stray trailing U+0000 that is not part
+    /// of the real name. Left in, it makes every path contain a null character, so every file
+    /// API — delete, rename, copy — fails with "Null character in path". The real file has no
+    /// null, so stripping it here gives a name that all operations can actually use.
+    /// </summary>
+    private static string StripNul(string value) => value.TrimEnd('\0');
+
     public static FileSystemItem FromDirectory(DirectoryInfo dir) => new()
     {
-        Name = dir.Name,
-        FullPath = dir.FullName,
+        Name = StripNul(dir.Name),
+        FullPath = StripNul(dir.FullName),
         IsDirectory = true,
         Modified = dir.LastWriteTime
     };
 
     public static FileSystemItem FromFile(FileInfo file) => new()
     {
-        Name = file.Name,
-        FullPath = file.FullName,
+        Name = StripNul(file.Name),
+        FullPath = StripNul(file.FullName),
         IsDirectory = false,
         Size = file.Length,
         Modified = file.LastWriteTime

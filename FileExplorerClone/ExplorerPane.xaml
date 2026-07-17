@@ -133,9 +133,23 @@
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding NameWarningTooltip}">
                                     <TextBlock Text="{Binding Icon}" Margin="0,0,6,0"/>
                                     <TextBlock Text="{Binding Name}"/>
+                                    <!-- Warning marker for names ending in a space or dot; hidden otherwise. -->
+                                    <TextBlock Text="&#x26A0;" Foreground="#C77700" FontSize="12"
+                                               Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasProblematicName}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

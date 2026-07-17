@@ -2,10 +2,71 @@
 
 All notable changes, newest first. Versions are bumped by `publish.ps1` on every publish.
 
-Everything below was built in one session on **16. 07. 2026**, starting from a working but
-bare dual-pane explorer (two panes, Sync View, context-menu file operations, English only).
+Versions **1.0.1–1.0.8** were built in one session on **16. 07. 2026**, starting from a working
+but bare dual-pane explorer (two panes, Sync View, context-menu file operations, English only).
+Versions **1.0.9–1.0.16** followed in a second session on **17. 07. 2026**, focused on
+drag-and-drop correctness, a WebDAV delete bug, and the logging that eventually cracked it.
 
 ---
+
+## 1.0.16 / 1.0.14 — Rebuilds, no functional change
+
+- Clean rebuilds with no code changes, each carrying the preceding version's fixes (1.0.15 and
+  1.0.13 respectively) with an updated version stamp.
+
+## 1.0.15 — WebDAV delete finally fixed: the trailing NUL
+
+- **Root cause found.** The `diagnostika…@SSL@2078\DavWWWRoot` WebDAV share returns *every*
+  enumerated entry with a stray trailing `U+0000` null character — the file really named
+  `same1.txt` comes back as `same1.txt\0`. That invisible null showed as a "trailing space" in
+  the error dialog and made every file API fail with **"Null character in path"**. This was the
+  actual blocker behind 1.0.10 and 1.0.12 — both earlier fixes were treating symptoms.
+- **Fix:** `FileSystemItem` now strips trailing NULs from names and paths the moment they are
+  read (`StripNul`), so delete, rename, copy and navigation all use the true name. Verified
+  end-to-end against the live share.
+- Also filter out the `.` and `..` pseudo-entries that this server lists, so they no longer
+  appear as junk folder rows.
+
+> **How it was found:** the 1.0.11 logging turned a blank "Could not delete" into the exact
+> `ArgumentException (0x80070057): Null character in path`, and dumping the filename's code
+> points (`U+0061 U+0061 U+0061 U+0000` for `aaa`) revealed the trailing null.
+
+## 1.0.13 — Trailing space/dot name detection
+
+- **Flags files whose name ends in a space or a dot** with an amber ⚠ marker and an explanatory
+  tooltip, and logs a `WARN` on navigation. Windows silently trims a trailing space/dot during
+  path normalisation, so such files resist delete/rename; the flag tells the user to rename
+  them. (Independent of the WebDAV NUL issue, which is a different, invisible character.)
+
+## 1.0.12 — WebDAV delete attempt #2 (superseded by 1.0.15)
+
+- Permanent deletes bypass the `Microsoft.VisualBasic` shell helper and use plain
+  `File.Delete` / `Directory.Delete`. Correct in general (those map straight onto the Win32
+  calls), but did **not** fix the share on its own — the real cause was the trailing NUL.
+
+## 1.0.11 — File-operation logging
+
+- **Always-on logging** to `%APPDATA%\Dvojnik\logs\dvojnik-YYYYMMDD.log`, kept 7 days. Records
+  every copy/move/delete/rename/paste with source, target and outcome; full exceptions **with
+  their HRESULT** on failure; drag decisions (`effect`, `samePane`); navigation; sort; and a
+  global handler that captures any unhandled crash with a stack trace. Never logs file
+  contents, never throws.
+- The **About window gained a "Logs" link** that opens the log folder.
+- This is what made the WebDAV bug diagnosable — see 1.0.15.
+
+## 1.0.10 — WebDAV delete attempt #1 (superseded by 1.0.15)
+
+- Detects locations without a Recycle Bin (UNC / network / WebDAV) and falls back to a
+  permanent delete there, matching Explorer, with a prompt that warns the delete is permanent.
+  A sound behaviour to keep, but not the actual cause of the failure.
+
+## 1.0.9 — Drag-and-drop move vs. copy
+
+- **A drag within one pane now moves; a drag from the other pane (or from Explorer) copies.**
+  Previously a plain drag always copied, so dragging a file inside the same pane duplicated it.
+  Dropping onto a subfolder moves into it; dropping back into the same folder is a no-op and the
+  cursor shows "no drop". **SHIFT** still forces a move. Verified by driving the real app with
+  synthetic mouse input across all three cases.
 
 ## 1.0.8 — Rebuild, no functional change
 

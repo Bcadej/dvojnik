@@ -117,6 +117,12 @@
   <data name="About_SettingsTooltip" xml:space="preserve">
     <value>Kliknite, da odprete mapo z datoteko nastavitev</value>
   </data>
+  <data name="About_Logs" xml:space="preserve">
+    <value>Dnevniki:</value>
+  </data>
+  <data name="About_LogsTooltip" xml:space="preserve">
+    <value>Kliknite, da odprete mapo z dnevniki</value>
+  </data>
   <data name="About_Description" xml:space="preserve">
     <value>Dvopodokenski upravitelj datotek za Windows.</value>
   </data>
@@ -251,6 +257,12 @@ Odstranjena bo s seznama.</value>
   </data>
   <data name="Msg_Delete_Confirm" xml:space="preserve">
     <value>Ali želite premakniti {0} elementov v koš?</value>
+  </data>
+  <data name="Msg_DeletePermanent_Confirm" xml:space="preserve">
+    <value>Na tem mestu ni koša. Ali želite trajno izbrisati {0} elementov?</value>
+  </data>
+  <data name="Warn_TrailingSpaceDot" xml:space="preserve">
+    <value>Ime se konča s presledkom ali piko. Windows tak konec pri brisanju ali preimenovanju samodejno odreže, zato ta dejanja morda ne bodo uspela. Datoteko preimenujte in odstranite presledek oziroma piko na koncu.</value>
   </data>
   <data name="Msg_CouldNotDelete" xml:space="preserve">
     <value>Elementa {0} ni bilo mogoče izbrisati:

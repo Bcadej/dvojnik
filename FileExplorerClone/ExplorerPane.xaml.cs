@@ -42,6 +42,12 @@ public partial class ExplorerPane : UserControl
     private Point _dragStart;
     private bool _mayStartDrag;
 
+    /// <summary>
+    /// The pane a drag started from, so a drop can tell a same-pane rearrange apart from a
+    /// transfer between the two panes. Null whenever the drag came from outside the app.
+    /// </summary>
+    private static ExplorerPane? _dragSourcePane;
+
     public string CurrentPath { get; private set; } = "";
 
     // Fired whenever this pane successfully navigates. Used by MainWindow for sync mode.
@@ -97,6 +103,7 @@ public partial class ExplorerPane : UserControl
     {
         if (!Directory.Exists(path))
         {
+            Logger.Nav($"{PaneId}: path not found \"{path}\"");
             MessageBox.Show(Strings.Format("Msg_PathNotFound", path), Strings.Get("Msg_Navigate_Title"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
@@ -109,6 +116,8 @@ public partial class ExplorerPane : UserControl
 
             foreach (var d in dirInfo.GetDirectories().OrderBy(d => d.Name))
             {
+                // Some WebDAV servers list the "." and ".." pseudo-entries; never show them.
+                if (IsDotEntry(d.Name)) continue;
                 try { entries.Add(FileSystemItem.FromDirectory(d)); } catch { /* skip inaccessible */ }
             }
             foreach (var f in dirInfo.GetFiles().OrderBy(f => f.Name))
@@ -134,13 +143,28 @@ public partial class ExplorerPane : UserControl
                 _historyIndex = _history.Count - 1;
             }
 
+            Logger.Nav($"{PaneId}: -> \"{CurrentPath}\" ({_realItems.Count} items)");
+
+            var flagged = _realItems.Where(i => i.HasProblematicName).ToList();
+            if (flagged.Count > 0)
+                Logger.Warn($"{PaneId}: {flagged.Count} name(s) ending in a space or dot in \"{CurrentPath}\": " +
+                    string.Join(", ", flagged.Select(i => $"\"{i.Name}\"")));
+
             Navigated?.Invoke(this, CurrentPath);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
+            Logger.Error($"{PaneId}: access denied navigating to \"{path}\"", ex);
             MessageBox.Show(Strings.Get("Msg_AccessDenied"), Strings.Get("Msg_Navigate_Title"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
         }
+    }
+
+    /// <summary>True for the "." / ".." self and parent pseudo-entries (allowing a trailing NUL).</summary>
+    private static bool IsDotEntry(string name)
+    {
+        var n = name.TrimEnd('\0');
+        return n is "." or "..";
     }
 
     /// <summary>Re-reads the current folder without touching the history stack.</summary>
@@ -178,6 +202,7 @@ public partial class ExplorerPane : UserControl
         else { SortField = field; SortAscending = true; }
 
         ApplySort();
+        Logger.Debug($"{PaneId}: sort {SortField} {(SortAscending ? "asc" : "desc")}");
         SortChanged?.Invoke(this);
     }
 
@@ -476,8 +501,16 @@ public partial class ExplorerPane : UserControl
         // Link must be allowed too, otherwise a drop on our own shortcut bar (which answers
         // with Link) gets downgraded to None and silently refused.
         var data = new DataObject(DataFormats.FileDrop, paths);
-        DragDrop.DoDragDrop(FileListView, data,
-            DragDropEffects.Copy | DragDropEffects.Move | DragDropEffects.Link);
+        _dragSourcePane = this;
+        try
+        {
+            DragDrop.DoDragDrop(FileListView, data,
+                DragDropEffects.Copy | DragDropEffects.Move | DragDropEffects.Link);
+        }
+        finally
+        {
+            _dragSourcePane = null;
+        }
 
         // The drop target may have moved files out from under us.
         FileSystemChanged?.Invoke();
@@ -486,14 +519,42 @@ public partial class ExplorerPane : UserControl
     private void FileListView_DragOver(object sender, DragEventArgs e)
     {
         e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
-            ? EffectForModifiers(e.KeyStates)
+            ? EffectForDrop(e)
             : DragDropEffects.None;
         e.Handled = true;
     }
 
-    /// <summary>Plain drag copies; holding SHIFT moves.</summary>
-    private static DragDropEffects EffectForModifiers(DragDropKeyStates keyStates)
-        => keyStates.HasFlag(DragDropKeyStates.ShiftKey) ? DragDropEffects.Move : DragDropEffects.Copy;
+    /// <summary>
+    /// A drag that stays inside one pane rearranges that pane's own files, so it moves; a drag
+    /// arriving from the other pane (or from outside the app) copies. SHIFT forces a move either
+    /// way. A same-pane drop that would land back in the folder the files already live in is
+    /// reported as None, so the cursor admits up front that it will do nothing.
+    /// </summary>
+    private DragDropEffects EffectForDrop(DragEventArgs e)
+    {
+        bool isSamePane = ReferenceEquals(_dragSourcePane, this);
+        if (!isSamePane && !e.KeyStates.HasFlag(DragDropKeyStates.ShiftKey))
+            return DragDropEffects.Copy;
+
+        var targetDir = TargetDirFor(e);
+        if (string.IsNullOrEmpty(targetDir)) return DragDropEffects.None;
+
+        return isSamePane && PathsEqual(targetDir, CurrentPath)
+            ? DragDropEffects.None
+            : DragDropEffects.Move;
+    }
+
+    /// <summary>
+    /// Dropping onto a folder row targets that folder; anywhere else — including a blank
+    /// spacer row — targets this pane's current folder.
+    /// </summary>
+    private string TargetDirFor(DragEventArgs e)
+    {
+        var overItem = FindItemUnder(e.OriginalSource as DependencyObject);
+        return overItem is { IsDirectory: true, IsPlaceholder: false }
+            ? overItem.FullPath
+            : CurrentPath;
+    }
 
     private void FileListView_Drop(object sender, DragEventArgs e)
     {
@@ -502,16 +563,16 @@ public partial class ExplorerPane : UserControl
 
         e.Handled = true;
 
-        bool isMove = EffectForModifiers(e.KeyStates) == DragDropEffects.Move;
-        e.Effects = isMove ? DragDropEffects.Move : DragDropEffects.Copy;
+        var effect = EffectForDrop(e);
+        e.Effects = effect;
 
-        // Dropping onto a folder row targets that folder; anywhere else — including a blank
-        // spacer row — targets this pane's current folder.
-        var overItem = FindItemUnder(e.OriginalSource as DependencyObject);
-        var targetDir = overItem is { IsDirectory: true, IsPlaceholder: false }
-            ? overItem.FullPath
-            : CurrentPath;
+        bool samePane = ReferenceEquals(_dragSourcePane, this);
+        var targetDir = TargetDirFor(e);
+        Logger.Debug($"Drop: effect={effect} samePane={samePane} count={sources.Length} target=\"{targetDir}\"");
 
+        if (effect == DragDropEffects.None) return;
+
+        bool isMove = effect == DragDropEffects.Move;
         if (string.IsNullOrEmpty(targetDir)) return;
 
         bool changed = false;
@@ -525,6 +586,8 @@ public partial class ExplorerPane : UserControl
             }
             catch (Exception ex)
             {
+                Logger.Operation(isMove ? "MOVE" : "COPY", "FAIL", ex,
+                    ("src", source), ("dst", targetDir));
                 MessageBox.Show(Strings.Format("Msg_TransferFailed", Path.GetFileName(source), ex.Message),
                     Strings.Get("Msg_Transfer_Title"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -568,6 +631,8 @@ public partial class ExplorerPane : UserControl
             else File.Copy(source, dest, overwrite: false);
         }
 
+        Logger.Operation(isMove ? "MOVE" : "COPY", "OK", null,
+            ("src", source), ("dst", dest), ("dir", isDir));
         return true;
     }
 
@@ -604,6 +669,28 @@ public partial class ExplorerPane : UserControl
         if (string.Equals(full, rootFull, StringComparison.OrdinalIgnoreCase)) return true;
 
         return full.StartsWith(rootFull + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Whether a delete under <paramref name="path"/> can go to the Recycle Bin. Only fixed local
+    /// drives have one; UNC and mapped-network locations (WebDAV included) don't, so a recycle
+    /// delete there fails and must fall back to a permanent delete.
+    /// </summary>
+    private static bool SupportsRecycleBin(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return false;
+        try
+        {
+            var root = Path.GetPathRoot(Path.GetFullPath(path));
+            if (string.IsNullOrEmpty(root)) return false;
+            if (root.StartsWith(@"\\", StringComparison.Ordinal)) return false; // UNC / WebDAV
+            return new DriveInfo(root).DriveType == DriveType.Fixed;
+        }
+        catch
+        {
+            // If we can't tell, assume no Recycle Bin so the delete still goes through.
+            return false;
+        }
     }
 
     /// <summary>Walks up the visual tree from a hit-test result to the row's data item.</summary>
@@ -768,10 +855,12 @@ public partial class ExplorerPane : UserControl
             var newPath = Path.Combine(Path.GetDirectoryName(item.FullPath)!, newName);
             if (item.IsDirectory) Directory.Move(item.FullPath, newPath);
             else File.Move(item.FullPath, newPath);
+            Logger.Operation("RENAME", "OK", null, ("src", item.FullPath), ("dst", newPath));
             FileSystemChanged?.Invoke();
         }
         catch (Exception ex)
         {
+            Logger.Operation("RENAME", "FAIL", ex, ("src", item.FullPath), ("newName", newName));
             MessageBox.Show(Strings.Format("Msg_RenameFailed", ex.Message), Strings.Get("Rename_Title"),
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
@@ -784,7 +873,13 @@ public partial class ExplorerPane : UserControl
         var selected = SelectedRealItems();
         if (selected.Count == 0) return;
 
-        var result = MessageBox.Show(Strings.Format("Msg_Delete_Confirm", selected.Count),
+        // Network shares (including WebDAV) have no Recycle Bin, so a recycle delete just fails
+        // there. Fall back to a permanent delete on those locations — the same thing Explorer
+        // does — but say so in the prompt so the user knows nothing is recoverable.
+        bool recycle = SupportsRecycleBin(CurrentPath);
+        var confirmKey = recycle ? "Msg_Delete_Confirm" : "Msg_DeletePermanent_Confirm";
+
+        var result = MessageBox.Show(Strings.Format(confirmKey, selected.Count),
             Strings.Get("Menu_Delete"), MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result != MessageBoxResult.Yes) return;
 
@@ -792,20 +887,48 @@ public partial class ExplorerPane : UserControl
         {
             try
             {
-                if (item.IsDirectory)
-                    VbFileIO.FileSystem.DeleteDirectory(item.FullPath, VbFileIO.UIOption.OnlyErrorDialogs,
-                        VbFileIO.RecycleOption.SendToRecycleBin);
+                if (recycle)
+                    RecycleToBin(item);
                 else
-                    VbFileIO.FileSystem.DeleteFile(item.FullPath, VbFileIO.UIOption.OnlyErrorDialogs,
-                        VbFileIO.RecycleOption.SendToRecycleBin);
+                    DeletePermanently(item);
+
+                Logger.Operation("DELETE", "OK", null,
+                    ("path", item.FullPath), ("recycle", recycle), ("dir", item.IsDirectory));
             }
             catch (Exception ex)
             {
+                Logger.Operation("DELETE", "FAIL", ex,
+                    ("path", item.FullPath), ("recycle", recycle));
                 MessageBox.Show(Strings.Format("Msg_CouldNotDelete", item.Name, ex.Message),
                     Strings.Get("Menu_Delete"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         FileSystemChanged?.Invoke();
+    }
+
+    /// <summary>Sends an item to the Recycle Bin. Only the shell can recycle, so this goes through it.</summary>
+    private static void RecycleToBin(FileSystemItem item)
+    {
+        if (item.IsDirectory)
+            VbFileIO.FileSystem.DeleteDirectory(item.FullPath, VbFileIO.UIOption.OnlyErrorDialogs,
+                VbFileIO.RecycleOption.SendToRecycleBin);
+        else
+            VbFileIO.FileSystem.DeleteFile(item.FullPath, VbFileIO.UIOption.OnlyErrorDialogs,
+                VbFileIO.RecycleOption.SendToRecycleBin);
+    }
+
+    /// <summary>
+    /// Permanently deletes an item with the plain .NET file APIs. Unlike the VisualBasic shell
+    /// helper, these map straight onto the Win32 DeleteFile/RemoveDirectory calls, so they work
+    /// on WebDAV and other network paths that the shell operation rejects outright (it mangles
+    /// the DavWWWRoot path into one containing a null character).
+    /// </summary>
+    private static void DeletePermanently(FileSystemItem item)
+    {
+        if (item.IsDirectory)
+            Directory.Delete(item.FullPath, recursive: true);
+        else
+            File.Delete(item.FullPath);
     }
 
     private void CopyMenuItem_Click(object sender, RoutedEventArgs e) => CopySelection(cut: false);
@@ -846,9 +969,14 @@ public partial class ExplorerPane : UserControl
                     if (isDir) CopyDirectoryRecursive(srcPath, destPath);
                     else File.Copy(srcPath, destPath, overwrite: false);
                 }
+
+                Logger.Operation(_clipboardIsCut ? "PASTE-CUT" : "PASTE-COPY", "OK", null,
+                    ("src", srcPath), ("dst", destPath), ("dir", isDir));
             }
             catch (Exception ex)
             {
+                Logger.Operation(_clipboardIsCut ? "PASTE-CUT" : "PASTE-COPY", "FAIL", ex,
+                    ("src", srcPath), ("dst", CurrentPath));
                 MessageBox.Show(Strings.Format("Msg_PasteFailed", srcPath, ex.Message), Strings.Get("Menu_Paste"),
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }

@@ -3,6 +3,6 @@
        publish.ps1 bumps the patch number here before every publish,
        so the artefact you hand out always carries a fresh version. -->
   <PropertyGroup>
-    <VersionPrefix>1.0.8</VersionPrefix>
+    <VersionPrefix>1.0.16</VersionPrefix>
   </PropertyGroup>
 </Project>

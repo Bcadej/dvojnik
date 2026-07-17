@@ -14,6 +14,7 @@
             <RowDefinition Height="Auto"/>  <!-- build time -->
             <RowDefinition Height="Auto"/>  <!-- location -->
             <RowDefinition Height="Auto"/>  <!-- language setting file -->
+            <RowDefinition Height="Auto"/>  <!-- log folder -->
             <RowDefinition Height="Auto"/>  <!-- separator -->
             <RowDefinition Height="Auto"/>  <!-- close -->
         </Grid.RowDefinitions>
@@ -64,9 +65,19 @@
             </Hyperlink>
         </TextBlock>
 
-        <Separator Grid.Row="5" Grid.ColumnSpan="2" Margin="0,10,0,10"/>
+        <!-- Log folder (clickable: opens the logs folder) -->
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,12,6" FontWeight="SemiBold"
+                   Text="{Binding [About_Logs], Source={x:Static local:Loc.Instance}}"/>
+        <TextBlock Grid.Row="5" Grid.Column="1" Margin="0,0,0,6" TextWrapping="Wrap">
+            <Hyperlink x:Name="LogsLink" Click="LogsLink_Click"
+                       ToolTip="{Binding [About_LogsTooltip], Source={x:Static local:Loc.Instance}}">
+                <Run x:Name="LogsRun"/>
+            </Hyperlink>
+        </TextBlock>
 
-        <Button Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right"
+        <Separator Grid.Row="6" Grid.ColumnSpan="2" Margin="0,10,0,10"/>
+
+        <Button Grid.Row="7" Grid.Column="1" HorizontalAlignment="Right"
                 MinWidth="90" Padding="10,4" IsDefault="True" IsCancel="True"
                 Content="{Binding [About_Close], Source={x:Static local:Loc.Instance}}"/>
     </Grid>

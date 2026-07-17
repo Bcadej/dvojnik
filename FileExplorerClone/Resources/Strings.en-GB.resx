@@ -117,6 +117,12 @@
   <data name="About_SettingsTooltip" xml:space="preserve">
     <value>Click to open the folder containing the setting file</value>
   </data>
+  <data name="About_Logs" xml:space="preserve">
+    <value>Logs:</value>
+  </data>
+  <data name="About_LogsTooltip" xml:space="preserve">
+    <value>Click to open the log folder</value>
+  </data>
   <data name="About_Description" xml:space="preserve">
     <value>A dual-pane file manager for Windows.</value>
   </data>
@@ -251,6 +257,12 @@ It will be removed from the list.</value>
   </data>
   <data name="Msg_Delete_Confirm" xml:space="preserve">
     <value>Move {0} item(s) to the Recycle Bin?</value>
+  </data>
+  <data name="Msg_DeletePermanent_Confirm" xml:space="preserve">
+    <value>This location has no Recycle Bin. Permanently delete {0} item(s)?</value>
+  </data>
+  <data name="Warn_TrailingSpaceDot" xml:space="preserve">
+    <value>This name ends with a space or a dot. Windows trims that off when deleting or renaming, so those actions may fail. Rename the file to remove the trailing space or dot.</value>
   </data>
   <data name="Msg_CouldNotDelete" xml:space="preserve">
     <value>Could not delete {0}:
