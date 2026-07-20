@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using VbFileIO = Microsoft.VisualBasic.FileIO;
 
 namespace FileExplorerClone;
@@ -133,6 +134,7 @@ public partial class ExplorerPane : UserControl
 
             CurrentPath = dirInfo.FullName;
             AddressBar.Text = CurrentPath;
+            RebuildBreadcrumbs();
 
             if (!_suppressHistoryPush)
             {
@@ -296,11 +298,323 @@ public partial class ExplorerPane : UserControl
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e) => Refresh();
 
-    private void GoButton_Click(object sender, RoutedEventArgs e) => NavigateTo(AddressBar.Text.Trim());
+    private void GoButton_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateTo(AddressBar.Text.Trim());
+        ExitPathEditMode();
+    }
 
     private void AddressBar_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter) NavigateTo(AddressBar.Text.Trim());
+        if (e.Key == Key.Enter)
+        {
+            NavigateTo(AddressBar.Text.Trim());
+            ExitPathEditMode();
+        }
+        else if (e.Key == Key.Escape)
+        {
+            ExitPathEditMode();
+        }
+    }
+
+    // ----- Breadcrumb path bar -----
+
+    /// <summary>One clickable step of the current path, and the folder clicking it opens.</summary>
+    private readonly record struct PathCrumb(string Label, string FullPath);
+
+    /// <summary>Guards the retry-after-layout rebuild from queueing itself repeatedly.</summary>
+    private bool _crumbRebuildQueued;
+
+    /// <summary>How a crumb relates to the other pane's path.</summary>
+    private enum CrumbEmphasis
+    {
+        Normal,     // past the point where the two panes diverge
+        Shared,     // identical in both panes — dimmed, it carries no information
+        Divergent   // the step where the paths part company — highlighted
+    }
+
+    private static readonly Brush SharedCrumbBrush = Frozen(Color.FromRgb(0x9A, 0xA3, 0xB0));
+    private static readonly Brush DivergentCrumbBrush = Frozen(Color.FromRgb(0xFF, 0xEC, 0xB8));
+
+    private static Brush Frozen(Color color)
+    {
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        return brush;
+    }
+
+    /// <summary>The other pane's folder, so the crumbs can show where the two paths diverge.</summary>
+    private string _peerPath = "";
+
+    /// <summary>Told by MainWindow whenever either pane moves.</summary>
+    public void SetPeerPath(string path)
+    {
+        path ??= "";
+        if (string.Equals(_peerPath, path, StringComparison.OrdinalIgnoreCase)) return;
+        _peerPath = path;
+        RebuildBreadcrumbs();
+    }
+
+    private void EditPathButton_Click(object sender, RoutedEventArgs e) => EnterPathEditMode();
+
+    private void CrumbHost_SizeChanged(object sender, SizeChangedEventArgs e) => RebuildBreadcrumbs();
+
+    /// <summary>Clicking the empty strip beside the crumbs switches to a typeable path, as Explorer does.</summary>
+    private void CrumbHost_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource is Border) EnterPathEditMode();
+    }
+
+    /// <summary>Swaps the crumb strip for an editable text box holding the full path.</summary>
+    private void EnterPathEditMode()
+    {
+        AddressBar.Text = CurrentPath;
+        CrumbHost.Visibility = Visibility.Collapsed;
+        EditPathButton.Visibility = Visibility.Collapsed;
+        AddressBar.Visibility = Visibility.Visible;
+        GoButton.Visibility = Visibility.Visible;
+        AddressBar.Focus();
+        AddressBar.SelectAll();
+    }
+
+    private void ExitPathEditMode()
+    {
+        AddressBar.Visibility = Visibility.Collapsed;
+        GoButton.Visibility = Visibility.Collapsed;
+        CrumbHost.Visibility = Visibility.Visible;
+        EditPathButton.Visibility = Visibility.Visible;
+        RebuildBreadcrumbs();
+    }
+
+    /// <summary>Splits a path into its clickable steps, root first.</summary>
+    private static List<PathCrumb> SplitIntoCrumbs(string path)
+    {
+        var crumbs = new List<PathCrumb>();
+        if (string.IsNullOrEmpty(path)) return crumbs;
+
+        var root = Path.GetPathRoot(path);
+        if (string.IsNullOrEmpty(root)) return crumbs;
+
+        // "D:\" reads better as "D:"; a UNC root stays whole ("\\server\share").
+        crumbs.Add(new PathCrumb(Path.TrimEndingDirectorySeparator(root), root));
+
+        var accumulated = root;
+        foreach (var part in path[root.Length..]
+                     .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                     .Where(p => p.Length > 0))
+        {
+            accumulated = Path.Combine(accumulated, part);
+            crumbs.Add(new PathCrumb(part, accumulated));
+        }
+
+        return crumbs;
+    }
+
+    /// <summary>
+    /// Redraws the crumb strip to fit the pane. When the whole path does not fit, the root and
+    /// the deepest steps are kept and the middle collapses into a "…" menu — the tail is what
+    /// identifies a folder, so it is the last thing to be given up.
+    /// </summary>
+    private void RebuildBreadcrumbs()
+    {
+        _crumbRebuildQueued = false;
+        CrumbPanel.Children.Clear();
+
+        var crumbs = SplitIntoCrumbs(CurrentPath);
+        if (crumbs.Count == 0) return;
+
+        double available = CrumbHost.ActualWidth;
+        if (available <= 1)
+        {
+            // No width yet: either the first layout pass, or we were just switched back from
+            // edit mode and the strip has not been measured again. Retry once layout has run.
+            if (CrumbHost.Visibility == Visibility.Visible && !_crumbRebuildQueued)
+            {
+                _crumbRebuildQueued = true;
+                Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(RebuildBreadcrumbs));
+            }
+            return;
+        }
+
+        int divergence = DivergenceIndex(crumbs);
+
+        var buttons = new List<Button>(crumbs.Count);
+        for (int i = 0; i < crumbs.Count; i++)
+            buttons.Add(MakeCrumbButton(crumbs[i], i == crumbs.Count - 1, available,
+                EmphasisFor(i, divergence)));
+
+        var widths = buttons.Select(MeasureWidth).ToList();
+        double separator = MeasureWidth(MakeSeparator());
+        double overflowWidth = MeasureWidth(MakeOverflowButton());
+
+        // Steps that must survive collapsing: the root, the current folder, and — above all —
+        // the step where this pane's path parts from the other's. Collapsing that one would
+        // hide the very thing that tells the two panes apart.
+        var visible = new SortedSet<int> { 0, crumbs.Count - 1 };
+        if (divergence >= 0 && divergence < crumbs.Count) visible.Add(divergence);
+
+        // Then restore as much surrounding context as fits, deepest first.
+        for (int i = crumbs.Count - 2; i >= 1; i--)
+        {
+            if (visible.Contains(i)) continue;
+            var candidate = new SortedSet<int>(visible) { i };
+            if (StripWidth(candidate, widths, separator, overflowWidth) > available) continue;
+            visible = candidate;
+        }
+
+        RenderCrumbStrip(crumbs, buttons, visible);
+    }
+
+    /// <summary>Width of a crumb strip showing exactly <paramref name="visible"/>, with a "…" per gap.</summary>
+    private static double StripWidth(SortedSet<int> visible, List<double> widths,
+        double separator, double overflowWidth)
+    {
+        double total = 0;
+        int pieces = 0;
+        int? previous = null;
+
+        foreach (var i in visible)
+        {
+            if (previous is int p && i > p + 1)
+            {
+                total += overflowWidth;
+                pieces++;
+            }
+            total += widths[i];
+            pieces++;
+            previous = i;
+        }
+
+        return total + separator * Math.Max(0, pieces - 1);
+    }
+
+    /// <summary>Lays out the visible crumbs, dropping a "…" menu into every gap.</summary>
+    private void RenderCrumbStrip(List<PathCrumb> crumbs, List<Button> buttons, SortedSet<int> visible)
+    {
+        int? previous = null;
+
+        foreach (var i in visible)
+        {
+            if (previous is int p)
+            {
+                CrumbPanel.Children.Add(MakeSeparator());
+
+                if (i > p + 1)
+                {
+                    var overflow = MakeOverflowButton();
+                    for (int hidden = p + 1; hidden < i; hidden++)
+                        overflow.ContextMenu!.Items.Add(MakeOverflowEntry(crumbs[hidden]));
+
+                    CrumbPanel.Children.Add(overflow);
+                    CrumbPanel.Children.Add(MakeSeparator());
+                }
+            }
+
+            CrumbPanel.Children.Add(buttons[i]);
+            previous = i;
+        }
+    }
+
+    /// <summary>
+    /// Index of the first step where this pane's path parts company with the other pane's, or
+    /// -1 when there is nothing to compare (no peer, or the two paths are identical). Steps
+    /// before it are common to both panes and get dimmed; the step at it is the pivot.
+    /// </summary>
+    private int DivergenceIndex(List<PathCrumb> crumbs)
+    {
+        if (string.IsNullOrEmpty(_peerPath)) return -1;
+
+        var peer = SplitIntoCrumbs(_peerPath);
+        if (peer.Count == 0) return -1;
+
+        int i = 0;
+        while (i < crumbs.Count && i < peer.Count &&
+               string.Equals(crumbs[i].Label, peer[i].Label, StringComparison.OrdinalIgnoreCase))
+            i++;
+
+        // Same folder on both sides: there is nothing to tell apart.
+        return i == crumbs.Count && i == peer.Count ? -1 : i;
+    }
+
+    private static CrumbEmphasis EmphasisFor(int index, int divergence)
+    {
+        if (divergence < 0) return CrumbEmphasis.Normal;
+        if (index < divergence) return CrumbEmphasis.Shared;
+        return index == divergence ? CrumbEmphasis.Divergent : CrumbEmphasis.Normal;
+    }
+
+    private Button MakeCrumbButton(PathCrumb crumb, bool isLeaf, double available, CrumbEmphasis emphasis)
+    {
+        var label = new TextBlock
+        {
+            Text = crumb.Label,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            MaxWidth = Math.Max(60, available - 40),
+            // Bold marks the current folder. Colour — not weight — carries the shared/divergent
+            // signal, so the two meanings never compete for the same visual channel.
+            FontWeight = isLeaf ? FontWeights.Bold : FontWeights.Normal
+        };
+        if (emphasis == CrumbEmphasis.Shared) label.Foreground = SharedCrumbBrush;
+
+        var button = new Button
+        {
+            Content = label,
+            Style = (Style)FindResource("CrumbButton"),
+            ToolTip = crumb.FullPath,
+            Tag = crumb.FullPath
+        };
+        if (emphasis == CrumbEmphasis.Divergent) button.Background = DivergentCrumbBrush;
+
+        System.Windows.Automation.AutomationProperties.SetName(button, crumb.Label);
+        button.Click += Crumb_Click;
+        return button;
+    }
+
+    private Button MakeOverflowButton()
+    {
+        var button = new Button
+        {
+            Content = new TextBlock { Text = "…" },
+            Style = (Style)FindResource("CrumbButton"),
+            ToolTip = Strings.Get("Pane_MorePath"),
+            ContextMenu = new ContextMenu()
+        };
+        System.Windows.Automation.AutomationProperties.SetName(button, Strings.Get("Pane_MorePath"));
+
+        button.Click += (_, _) =>
+        {
+            if (button.ContextMenu is not { Items.Count: > 0 } menu) return;
+            menu.PlacementTarget = button;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            menu.IsOpen = true;
+        };
+        return button;
+    }
+
+    private MenuItem MakeOverflowEntry(PathCrumb crumb)
+    {
+        var item = new MenuItem { Header = crumb.Label, Tag = crumb.FullPath };
+        item.Click += Crumb_Click;
+        return item;
+    }
+
+    private void Crumb_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: string path }) NavigateTo(path);
+    }
+
+    private static TextBlock MakeSeparator() => new()
+    {
+        Text = "›", // ›
+        Foreground = Brushes.Gray,
+        Margin = new Thickness(1, 0, 1, 0),
+        VerticalAlignment = VerticalAlignment.Center
+    };
+
+    private static double MeasureWidth(UIElement element)
+    {
+        element.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        return element.DesiredSize.Width;
     }
 
     // ----- List handlers -----

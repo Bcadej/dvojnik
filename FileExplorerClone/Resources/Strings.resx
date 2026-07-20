@@ -143,6 +143,12 @@
   <data name="Pane_Go" xml:space="preserve">
     <value>Pojdi</value>
   </data>
+  <data name="Pane_EditPath" xml:space="preserve">
+    <value>Uredi pot (vnesite jo ročno)</value>
+  </data>
+  <data name="Pane_MorePath" xml:space="preserve">
+    <value>Prikaži skrite mape v poti</value>
+  </data>
 
   <!-- ===== Shortcut bar ===== -->
   <data name="Shortcuts_Hint" xml:space="preserve">

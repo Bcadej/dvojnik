@@ -143,6 +143,12 @@
   <data name="Pane_Go" xml:space="preserve">
     <value>Go</value>
   </data>
+  <data name="Pane_EditPath" xml:space="preserve">
+    <value>Edit path (type it in)</value>
+  </data>
+  <data name="Pane_MorePath" xml:space="preserve">
+    <value>Show hidden folders in the path</value>
+  </data>
 
   <!-- ===== Shortcut bar ===== -->
   <data name="Shortcuts_Hint" xml:space="preserve">

@@ -41,9 +41,15 @@ Switch **Sync View** on and the panes anchor to their current folders as roots. 
 
   | Colour | Meaning |
   |---|---|
-  | 🟩 Green | Exists only in this pane |
+  | 🟩 Green | Identical on both sides |
   | 🟧 Orange | Same name on both sides, but the size or modified date differs |
-  | ⬜ Plain | Identical on both sides |
+  | ⬜ Plain | Exists only in this pane |
+
+  **"Identical" means same name, same size and same modified time** — file contents are never
+  read, so this is a fast metadata check rather than a byte-for-byte diff. Folders are matched
+  by name alone; the comparison does not recurse into them. Note that the timestamp match is
+  exact, so a file copied onto FAT/exFAT (which rounds times to 2 seconds) can show as orange
+  even when the contents are the same.
 
   This makes it a quick way to eyeball two copies of a folder tree — a backup against an
   original, say — without a dedicated diff tool.

@@ -5,7 +5,8 @@ namespace FileExplorerClone;
 
 public enum CompareState
 {
-    Normal,     // no comparison active, or identical on both sides
+    Normal,     // no comparison running at all — Sync View is off
+    Identical,  // present on both sides, matching size and modified date
     OnlyHere,   // exists in this pane but not the other
     Differs     // same name exists on both sides but size/date differ
 }

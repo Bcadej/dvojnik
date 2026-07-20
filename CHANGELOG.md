@@ -6,8 +6,47 @@ Versions **1.0.1–1.0.8** were built in one session on **16. 07. 2026**, starti
 but bare dual-pane explorer (two panes, Sync View, context-menu file operations, English only).
 Versions **1.0.9–1.0.16** followed in a second session on **17. 07. 2026**, focused on
 drag-and-drop correctness, a WebDAV delete bug, and the logging that eventually cracked it.
+Versions **1.0.17–1.0.19** came in a third session on **20. 07. 2026**, all on one theme:
+telling the two panes apart.
 
 ---
+
+## 1.0.19 — Sync View colours re-mapped
+
+- **Green now means identical, and plain means "only in this pane"** — the previous scheme had
+  green on the only-here rows. Orange is unchanged. `README.md` updated to match.
+- Splitting these apart needed a new `CompareState.Identical`. The old `Normal` meant *both*
+  "Sync View is off" and "identical on both sides", which shared a value only because both drew
+  plain; colouring identical rows green would have turned **every** row green with sync off.
+  `Normal` now means only "no comparison running".
+- Documented what "identical" actually tests: same name, size and modified time. Contents are
+  never read, and folders are matched by name without recursing — so it is a fast metadata
+  check, not a byte-for-byte diff.
+
+## 1.0.18 — Breadcrumbs show where the panes diverge
+
+- **The shared part of the two panes' paths is dimmed and the step where they diverge is
+  highlighted**, so two deep paths that differ by one folder can be told apart at a glance.
+  Each pane is told the other's location on every navigation, so this works with Sync View
+  either on or off, and switches itself off when both panes show the same folder.
+- **The divergent step can never be collapsed.** It is pinned alongside the root and the current
+  folder before any context is filled in — otherwise the one segment that distinguishes the
+  panes would be the first thing hidden in a long path. `…` menus are now emitted per gap
+  rather than only after the root.
+- Colour carries the shared/divergent signal while **bold** stays reserved for the current
+  folder, so the two meanings never compete for the same visual channel.
+
+## 1.0.17 — Breadcrumb path bar
+
+- **The address bar is now a breadcrumb trail**: clickable path segments, the middle collapsing
+  into a `…` menu that lists the hidden ancestors, and the current folder in bold.
+- **The path bar fills the pane.** It lived in a `ToolBar`, which refuses to stretch its children
+  and hides the surplus behind an overflow chevron — that, not the path length, was why a long
+  location was cut off in a half-empty bar. It is now a `DockPanel`.
+- When a path still cannot fit, the **root and the deepest folders are kept**: the tail is what
+  identifies a folder, so it is the last thing given up.
+- Typing a path still works — the ✎ button (or clicking the empty strip) swaps in a text box;
+  Enter or Go commits, Escape cancels. Every crumb carries its full path as a tooltip.
 
 ## 1.0.16 / 1.0.14 — Rebuilds, no functional change
 

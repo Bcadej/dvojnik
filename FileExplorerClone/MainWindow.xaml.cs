@@ -177,7 +177,18 @@ public partial class MainWindow : Window
             }
         }
 
+        SyncPeerPaths();
         CompareAndHighlight();
+    }
+
+    /// <summary>
+    /// Tells each pane where the other one is, so their breadcrumb bars can dim the part of the
+    /// path they share and highlight the step where they diverge.
+    /// </summary>
+    private void SyncPeerPaths()
+    {
+        LeftPane.SetPeerPath(RightPane.CurrentPath);
+        RightPane.SetPeerPath(LeftPane.CurrentPath);
     }
 
     // Compares the two panes' current listings by name, highlights differences, and pads
@@ -280,7 +291,7 @@ public partial class MainWindow : Window
         if (!item.IsDirectory && (match.Size != item.Size || match.Modified != item.Modified))
             return CompareState.Differs;
 
-        return CompareState.Normal;
+        return CompareState.Identical;
     }
 
     private void ClearHighlights()

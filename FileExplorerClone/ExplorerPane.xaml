@@ -5,24 +5,83 @@
              FontSize="{StaticResource AppFontSize}">
     <UserControl.Resources>
         <local:CompareStateToBrushConverter x:Key="CompareBrushConverter"/>
+
+        <!-- Flat, borderless button used by the nav icons and every path crumb. -->
+        <ControlTemplate x:Key="FlatButtonTemplate" TargetType="Button">
+            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="3"
+                    Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="#E3EAF5"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.4"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <Style x:Key="FlatIconButton" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template" Value="{StaticResource FlatButtonTemplate}"/>
+        </Style>
+
+        <Style x:Key="CrumbButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template" Value="{StaticResource FlatButtonTemplate}"/>
+        </Style>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
 
-        <!-- Toolbar -->
-        <ToolBar DockPanel.Dock="Top">
-            <Button x:Name="BackButton" Content="&#x2190;" Click="BackButton_Click" Width="32"
-                    ToolTip="{Binding [Pane_Back], Source={x:Static local:Loc.Instance}}"/>
-            <Button x:Name="ForwardButton" Content="&#x2192;" Click="ForwardButton_Click" Width="32"
-                    ToolTip="{Binding [Pane_Forward], Source={x:Static local:Loc.Instance}}"/>
-            <Button x:Name="UpButton" Content="&#x2191;" Click="UpButton_Click" Width="32"
-                    ToolTip="{Binding [Pane_Up], Source={x:Static local:Loc.Instance}}"/>
-            <Button x:Name="RefreshButton" Content="&#x21BB;" Click="RefreshButton_Click" Width="32"
-                    ToolTip="{Binding [Pane_Refresh], Source={x:Static local:Loc.Instance}}"/>
-            <Separator/>
-            <TextBox x:Name="AddressBar" Width="280" VerticalAlignment="Center" KeyDown="AddressBar_KeyDown"/>
-            <Button Click="GoButton_Click" MinWidth="44" Padding="6,2"
-                    Content="{Binding [Pane_Go], Source={x:Static local:Loc.Instance}}"/>
-        </ToolBar>
+        <!-- Navigation + path bar.
+             A DockPanel rather than a ToolBar: ToolBar will not stretch its children and hides
+             the surplus behind an overflow chevron, which is what squeezed the old fixed-width
+             address box. Here the crumb strip takes every pixel the pane can spare. -->
+        <Border DockPanel.Dock="Top" Padding="4,3"
+                Background="#FAFBFD" BorderBrush="#DDE3EC" BorderThickness="0,0,0,1">
+            <DockPanel LastChildFill="True">
+                <Button x:Name="BackButton" DockPanel.Dock="Left" Content="&#x2190;"
+                        Style="{StaticResource FlatIconButton}" Click="BackButton_Click"
+                        ToolTip="{Binding [Pane_Back], Source={x:Static local:Loc.Instance}}"/>
+                <Button x:Name="ForwardButton" DockPanel.Dock="Left" Content="&#x2192;"
+                        Style="{StaticResource FlatIconButton}" Click="ForwardButton_Click"
+                        ToolTip="{Binding [Pane_Forward], Source={x:Static local:Loc.Instance}}"/>
+                <Button x:Name="UpButton" DockPanel.Dock="Left" Content="&#x2191;"
+                        Style="{StaticResource FlatIconButton}" Click="UpButton_Click"
+                        ToolTip="{Binding [Pane_Up], Source={x:Static local:Loc.Instance}}"/>
+                <Button x:Name="RefreshButton" DockPanel.Dock="Left" Content="&#x21BB;"
+                        Style="{StaticResource FlatIconButton}" Click="RefreshButton_Click"
+                        ToolTip="{Binding [Pane_Refresh], Source={x:Static local:Loc.Instance}}"/>
+
+                <!-- Only shown while the path is being typed. -->
+                <Button x:Name="GoButton" DockPanel.Dock="Right" Visibility="Collapsed"
+                        MinWidth="44" Padding="8,2" Margin="4,0,0,0" Click="GoButton_Click"
+                        Content="{Binding [Pane_Go], Source={x:Static local:Loc.Instance}}"/>
+                <Button x:Name="EditPathButton" DockPanel.Dock="Right" Content="&#x270E;"
+                        Style="{StaticResource FlatIconButton}" Click="EditPathButton_Click"
+                        ToolTip="{Binding [Pane_EditPath], Source={x:Static local:Loc.Instance}}"
+                        AutomationProperties.Name="{Binding [Pane_EditPath], Source={x:Static local:Loc.Instance}}"/>
+
+                <Grid Margin="4,0,0,0">
+                    <Border x:Name="CrumbHost" Background="Transparent" ClipToBounds="True"
+                            MouseLeftButtonDown="CrumbHost_MouseLeftButtonDown"
+                            SizeChanged="CrumbHost_SizeChanged">
+                        <StackPanel x:Name="CrumbPanel" Orientation="Horizontal"
+                                    VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBox x:Name="AddressBar" Visibility="Collapsed" VerticalAlignment="Center"
+                             KeyDown="AddressBar_KeyDown"/>
+                </Grid>
+            </DockPanel>
+        </Border>
 
         <!-- Shortcut bar: drop targets the user builds up by dragging folders/files here -->
         <Border DockPanel.Dock="Top" MinHeight="36"
